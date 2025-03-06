@@ -1,0 +1,7 @@
+# Habilitar reescrita de URLs
+RewriteEngine On
+
+# Redireciona todas as requisições para o index.php na pasta public
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

@@ -1,5 +1,7 @@
 <?php
 
+use App\Handlers\HttpErrorHandler;
+use App\Handlers\ShutdownHandler;
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
@@ -30,8 +32,12 @@ $callableResolver = $app->getCallableResolver();
 $responseFactory = $app->getResponseFactory();
 $serverRequestCreator = ServerRequestCreatorFactory::create();
 $request = $serverRequestCreator->createServerRequestFromGlobals();
+$errorHandler = new HttpErrorHandler($callableResolver, $responseFactory);
+$shutdownHandler = new ShutdownHandler($request, $errorHandler, $displayErrorDetails);
+register_shutdown_function($shutdownHandler);
 $app->addRoutingMiddleware();
 $errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, false, false);
+$errorMiddleware->setDefaultErrorHandler($errorHandler);
 
 // Carregar as configurações
 //$config = require __DIR__ . '/config/config.php';

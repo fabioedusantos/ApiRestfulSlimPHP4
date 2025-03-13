@@ -6,7 +6,7 @@ namespace App\Services;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Exceptions\UnauthorizedException;
-use App\Helpers\RecaptchaHelper;
+use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;
@@ -21,8 +21,8 @@ class AuthService
     public function __construct(
         private UserRepository $userRepository
     ) {
-        $this->jwtSecret = $_ENV['JWT_SECRET'] ?? '';
-        $this->jwtRefreshSecret = $_ENV['JWT_REFRESH_SECRET'] ?? '';
+        $this->jwtSecret = Util::getEnv('JWT_SECRET') ?? '';
+        $this->jwtRefreshSecret = Util::getEnv('JWT_REFRESH_SECRET') ?? '';
     }
 
     public function signup(
@@ -35,7 +35,7 @@ class AuthService
         string $recaptchaToken,
         string $recaptchaSiteKey
     ): array {
-        if (!true) { //todo implementar google recaptcha para validação
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
             throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
         }
 
@@ -78,11 +78,11 @@ class AuthService
 
         $senha = password_hash($senha, PASSWORD_BCRYPT);
         $codigoConfirmacao = $this->generateRandomConfirmationCode();
-        $validade = $this->generateExpirationTime();
+        $validadeCodigoConfirmacao = $this->generateExpirationTime();
         $codigoConfirmacaoHash = password_hash($codigoConfirmacao, PASSWORD_BCRYPT);
 
         try {
-            $this->userRepository->create($nome, $sobrenome, $email, $senha, $codigoConfirmacaoHash, $validade);
+            $this->userRepository->create($nome, $sobrenome, $email, $senha, $codigoConfirmacaoHash, $validadeCodigoConfirmacao);
         } catch (\Exception $e) {
             throw new InternalServerErrorException("Erro ao criar usuário. Tente novamente.", 0, $e);
         }

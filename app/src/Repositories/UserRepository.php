@@ -34,14 +34,13 @@ class UserRepository
         return $stmt->fetch() ?: null;
     }
 
-
     public function create(
         string $nome,
         string $sobrenome,
         string $email,
         string $hashSenha,
         string $hashResetCode,
-        string $resetCodeExpiry
+        string $validadeResetCode
     ): string {
         try {
             $uuid = Uuid::uuid4()->toString();
@@ -63,7 +62,7 @@ class UserRepository
             $stmt = $this->db->prepare($sql);
             $stmt->bindParam(':id', $uuid);
             $stmt->bindParam(':reset_code', $hashResetCode);
-            $stmt->bindParam(':reset_code_expiry', $resetCodeExpiry);
+            $stmt->bindParam(':reset_code_expiry', $validadeResetCode);
             $stmt->execute();
 
             $this->db->commit();

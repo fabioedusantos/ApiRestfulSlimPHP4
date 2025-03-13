@@ -1,3 +1,6 @@
-/store/.env
 /.idea
+
+/store/.env
+/store/recaptcha_google_key.json
+
 /app/vendor

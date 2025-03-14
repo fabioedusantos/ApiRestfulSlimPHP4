@@ -10,6 +10,7 @@ use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;
+use Predis\Client;
 
 class AuthService
 {
@@ -19,7 +20,8 @@ class AuthService
     private int $horasExpirarConfirmacaoSenha = 2;
 
     public function __construct(
-        private UserRepository $userRepository
+        private UserRepository $userRepository,
+        private Client $redisClient
     ) {
         $this->jwtSecret = Util::getEnv('JWT_SECRET') ?? '';
         $this->jwtRefreshSecret = Util::getEnv('JWT_REFRESH_SECRET') ?? '';
@@ -159,6 +161,14 @@ class AuthService
         string $codigo,
         string $tempoDuracao
     ): void {
-        //todo implementar um redis aqui
+        $job = [
+            "type" => $type,
+            "email" => $email,
+            "nome" => $nome,
+            "codigo" => $codigo,
+            "tempoDuracao" => $tempoDuracao
+        ];
+
+        $this->redisClient->rpush('email_queue', [json_encode($job)]);
     }
 }

@@ -4,6 +4,8 @@ use App\Controllers\AuthController;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 
+use Predis\Client;
+
 use function DI\autowire;
 
 return [
@@ -21,6 +23,13 @@ return [
 
         return $pdo;
     },
+
+    //REDIS - EMAIL
+    Client::class => new Client([
+        'scheme' => 'tcp',
+        'host' => 'redis',
+        'port' => 6379,
+    ]),
 
 
     UserRepository::class => autowire(UserRepository::class),

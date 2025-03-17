@@ -105,6 +105,74 @@ class AuthService
         return ['expirationInHours' => $this->horasExpirarConfirmacaoSenha];
     }
 
+    public function resendConfirmEmail(
+        string $email,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): array {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new BadRequestException("Email deve ser válido.");
+        }
+
+        $this->savePasswordResetCode($email);
+
+        return ['expirationInHours' => $this->horasExpirarConfirmacaoSenha];
+    }
+
+    private function savePasswordResetCode(
+        string $email,
+        bool $isForceRegenerateCode = false
+    ): void {
+        if ($isForceRegenerateCode) {
+            $user = $this->userRepository->getByEmail($email);
+            if (empty($user)) {
+                throw new BadRequestException("Não foi possível gerar o código de confirmação. Usuário não encontrado.");
+            }
+        } else {
+            $user = $this->userRepository->getByEmailWithPasswordReset($email);
+            if (empty($user)) {
+                throw new BadRequestException("Não foi possível gerar o código de confirmação. Usuário não encontrado ou não possui uma redefinição de senha ativa.");
+            }
+        }
+
+        if (!empty($user['firebase_uid'])) {
+            throw new BadRequestException("Não é possível redefinir senha de conta Firebase/Google.");
+        }
+
+        $codigoConfirmacao = $this->generateRandomConfirmationCode();
+        $validadeCodigoConfirmacao = $this->generateExpirationTime();
+        $codigoConfirmacaoHash = password_hash($codigoConfirmacao, PASSWORD_BCRYPT);
+        try {
+            if (!$this->userRepository->updateResetCode($user['id'], $codigoConfirmacaoHash, $validadeCodigoConfirmacao)) {
+                throw new \Exception();
+            }
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException(
+                "Não foi possível salvar o código de confirmação. Tente novamente.",
+                0,
+                $e
+            );
+        }
+
+        try {
+            $this->sendPasswordResetEmail(
+                $user['email'],
+                $user['nome'],
+                $codigoConfirmacao,
+                "{$this->horasExpirarConfirmacaoSenha} horas"
+            );
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException(
+                "Não foi possível enviar o email com o código por uma falha interna. Tente novamente.", 0, $e
+            );
+        }
+    }
+
+
     private function generateRandomConfirmationCode(): string
     {
         try {

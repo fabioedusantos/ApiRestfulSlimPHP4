@@ -10,5 +10,10 @@ return function (App $app) {
             '/signup',
             [AuthController::class, 'signUp']
         );
+
+        $group->post(
+            '/resend_confirm_email',
+            [AuthController::class, 'resendConfirmEmail']
+        );
     });
 };

@@ -34,6 +34,39 @@ class UserRepository
         return $stmt->fetch() ?: null;
     }
 
+    public function getByEmailWithPasswordReset(string $email): ?array
+    {
+        $sql = "SELECT 
+                    u.id,
+                    u.nome,
+                    u.sobrenome,
+                    u.photo_blob,
+                    u.email,
+                    u.senha,
+                    u.firebase_uid,
+                    u.termos_aceito_em,
+                    u.politica_aceita_em,
+                    u.is_active,
+                    u.penultimo_acesso,
+                    u.ultimo_acesso,
+                    u.criado_em,
+                    u.alterado_em,
+                    p.reset_code, 
+                    p.reset_code_expiry
+                FROM 
+                    users AS u
+                INNER JOIN user_password_resets as p ON p.user_id = u.id
+                WHERE 
+                    u.email = :email 
+                    AND p.reset_code IS NOT NULL";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        $user = $stmt->fetch();
+        return !empty($user['id']) ? $user : null;
+    }
+
     public function create(
         string $nome,
         string $sobrenome,
@@ -72,5 +105,17 @@ class UserRepository
             $this->db->rollBack();
             throw $e;
         }
+    }
+
+    function updateResetCode(string $userId, string $hashResetCode, string $validadeResetCode): bool
+    {
+        $stmt = $this->db->prepare(
+            "UPDATE user_password_resets SET reset_code = :code, reset_code_expiry = :expiry WHERE user_id = :id"
+        );
+        return $stmt->execute([
+            'code' => $hashResetCode,
+            'expiry' => $validadeResetCode,
+            'id' => $userId
+        ]);
     }
 }

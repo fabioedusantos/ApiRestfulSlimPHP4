@@ -35,4 +35,22 @@ class AuthController
             $infoExpiration
         );
     }
+
+    public function resendConfirmEmail(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $infoExpiration = $this->authService->resendConfirmEmail(
+            $data['email'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::success(
+            $response,
+            "Se o e-mail informado estiver correto, você receberá em breve as instruções para redefinir sua senha.",
+            $infoExpiration
+        );
+    }
 }

@@ -53,4 +53,19 @@ class AuthController
             $infoExpiration
         );
     }
+
+    public function checkResetCode(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $this->authService->checkResetPassword(
+            $data['email'] ?? '',
+            $data['code'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::success($response, "Código ativo.", null);
+    }
 }

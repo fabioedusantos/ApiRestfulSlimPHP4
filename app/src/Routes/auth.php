@@ -15,5 +15,10 @@ return function (App $app) {
             '/resend_confirm_email',
             [AuthController::class, 'resendConfirmEmail']
         );
+
+        $group->post(
+            '/check_reset_code',
+            [AuthController::class, 'checkResetCode']
+        );
     });
 };

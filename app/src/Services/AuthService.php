@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Exceptions\UnauthorizedException;
@@ -169,6 +168,26 @@ class AuthService
             throw new InternalServerErrorException(
                 "Não foi possível enviar o email com o código por uma falha interna. Tente novamente.", 0, $e
             );
+        }
+    }
+
+    public function checkResetPassword(
+        string $email,
+        string $codigoConfirmacao,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): void {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        $user = $this->userRepository->getByEmailWithPasswordReset($email);
+        if (
+            empty($user)
+            || !password_verify($codigoConfirmacao, $user['reset_code'])
+            || new DateTime() > new DateTime($user['reset_code_expiry'])
+        ) {
+            throw new UnauthorizedException("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
         }
     }
 

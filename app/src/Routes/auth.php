@@ -20,5 +20,10 @@ return function (App $app) {
             '/check_reset_code',
             [AuthController::class, 'checkResetCode']
         );
+
+        $group->post(
+            '/confirm_email',
+            [AuthController::class, 'confirmEmail']
+        );
     });
 };

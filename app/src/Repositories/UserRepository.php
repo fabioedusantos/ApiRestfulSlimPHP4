@@ -8,7 +8,8 @@ use Ramsey\Uuid\Uuid;
 class UserRepository
 {
     public function __construct(private PDO $db)
-    {}
+    {
+    }
 
     public function getByEmail(string $email): ?array
     {
@@ -117,5 +118,37 @@ class UserRepository
             'expiry' => $validadeResetCode,
             'id' => $userId
         ]);
+    }
+
+    public function activate(string $userId): void
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare(
+                "
+                UPDATE users 
+                SET is_active = 1 
+                WHERE id = :id
+            "
+            );
+            $stmt->bindParam(':id', $userId);
+            $stmt->execute();
+
+            $stmt = $this->db->prepare(
+                "
+                UPDATE user_password_resets 
+                SET reset_code = NULL, reset_code_expiry = NULL
+                WHERE user_id = :id
+            "
+            );
+            $stmt->bindParam(':id', $userId);
+            $stmt->execute();
+
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
     }
 }

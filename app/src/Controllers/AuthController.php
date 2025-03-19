@@ -68,4 +68,19 @@ class AuthController
 
         return JsonResponse::success($response, "Código ativo.", null);
     }
+
+    public function confirmEmail(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $this->authService->confirmEmail(
+            $data['email'] ?? '',
+            $data['code'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::successNoContent($response);
+    }
 }

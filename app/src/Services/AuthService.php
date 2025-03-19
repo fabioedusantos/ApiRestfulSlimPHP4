@@ -6,6 +6,7 @@ use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Exceptions\UnauthorizedException;
 use App\Helpers\GoogleRecaptchaHelper;
+use App\Helpers\RecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;
@@ -188,6 +189,41 @@ class AuthService
             || new DateTime() > new DateTime($user['reset_code_expiry'])
         ) {
             throw new UnauthorizedException("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+        }
+    }
+
+    public function confirmEmail(
+        string $email,
+        string $codigoConfirmacao,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): void {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        // Validação do email: Deve ser um email válido
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new BadRequestException("Email deve ser válido.");
+        }
+
+        if (!strlen($codigoConfirmacao) == $this->digitosConfirmacaoSenha || !ctype_digit($codigoConfirmacao)) {
+            throw new UnauthorizedException("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+        }
+
+        $user = $this->userRepository->getByEmailWithPasswordReset($email);
+        if (
+            empty($user)
+            || !password_verify($codigoConfirmacao, $user['reset_code'])
+            || new DateTime() > new DateTime($user['reset_code_expiry'])
+        ) {
+            throw new BadRequestException("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+        }
+
+        try {
+            $this->userRepository->activate($user['id']);
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Não foi possível ativar o usuário. Tente novamente.", 0, $e);
         }
     }
 

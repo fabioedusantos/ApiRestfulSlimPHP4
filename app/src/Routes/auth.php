@@ -25,5 +25,10 @@ return function (App $app) {
             '/confirm_email',
             [AuthController::class, 'confirmEmail']
         );
+
+        $group->post(
+            '/forgot_password',
+            [AuthController::class, 'forgotPassword']
+        );
     });
 };

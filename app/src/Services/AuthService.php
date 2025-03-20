@@ -123,6 +123,7 @@ class AuthService
         return ['expirationInHours' => $this->horasExpirarConfirmacaoSenha];
     }
 
+
     private function savePasswordResetCode(
         string $email,
         bool $isForceRegenerateCode = false
@@ -225,6 +226,25 @@ class AuthService
         } catch (\Exception $e) {
             throw new InternalServerErrorException("Não foi possível ativar o usuário. Tente novamente.", 0, $e);
         }
+    }
+
+    public function forgotPassword(
+        string $email,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): array {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        // Validação do email: Deve ser um email válido
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new BadRequestException("Email deve ser válido.");
+        }
+
+        $this->savePasswordResetCode($email, true);
+
+        return ['expirationInHours' => $this->horasExpirarConfirmacaoSenha];
     }
 
 

@@ -83,4 +83,22 @@ class AuthController
 
         return JsonResponse::successNoContent($response);
     }
+
+    public function forgotPassword(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $infoExpiration = $this->authService->forgotPassword(
+            $data['email'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::success(
+            $response,
+            "Se o e-mail informado estiver correto, você receberá em breve as instruções para redefinir sua senha.",
+            $infoExpiration
+        );
+    }
 }

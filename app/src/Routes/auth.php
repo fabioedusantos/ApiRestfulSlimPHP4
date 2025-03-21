@@ -30,5 +30,10 @@ return function (App $app) {
             '/forgot_password',
             [AuthController::class, 'forgotPassword']
         );
+
+        $group->post(
+            '/reset_password',
+            [AuthController::class, 'resetPassword']
+        );
     });
 };

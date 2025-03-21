@@ -151,4 +151,37 @@ class UserRepository
             throw $e;
         }
     }
+
+    public function updatePassword(string $userId, string $hashSenha): void
+    {
+        try {
+            $this->db->beginTransaction();
+
+            $stmt = $this->db->prepare(
+                "
+            UPDATE users 
+            SET senha = :senha, is_active = 1, alterado_em = NOW()
+            WHERE id = :id
+        "
+            );
+            $stmt->bindParam(':senha', $hashSenha);
+            $stmt->bindParam(':id', $userId);
+            $stmt->execute();
+
+            $stmt = $this->db->prepare(
+                "
+            UPDATE user_password_resets 
+            SET reset_code = NULL, reset_code_expiry = NULL
+            WHERE user_id = :user_id
+        "
+            );
+            $stmt->bindParam(':user_id', $userId);
+            $stmt->execute();
+
+            $this->db->commit();
+        } catch (\Exception $e) {
+            $this->db->rollBack();
+            throw $e;
+        }
+    }
 }

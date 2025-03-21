@@ -101,4 +101,20 @@ class AuthController
             $infoExpiration
         );
     }
+
+    public function resetPassword(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $this->authService->resetPassword(
+            $data['email'] ?? '',
+            $data['code'] ?? '',
+            $data['password'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::successNoContent($response);
+    }
 }

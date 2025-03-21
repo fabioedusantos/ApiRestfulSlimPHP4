@@ -84,7 +84,14 @@ class AuthService
         $codigoConfirmacaoHash = password_hash($codigoConfirmacao, PASSWORD_BCRYPT);
 
         try {
-            $this->userRepository->create($nome, $sobrenome, $email, $senha, $codigoConfirmacaoHash, $validadeCodigoConfirmacao);
+            $this->userRepository->create(
+                $nome,
+                $sobrenome,
+                $email,
+                $senha,
+                $codigoConfirmacaoHash,
+                $validadeCodigoConfirmacao
+            );
         } catch (\Exception $e) {
             throw new InternalServerErrorException("Erro ao criar usuário. Tente novamente.", 0, $e);
         }
@@ -131,12 +138,16 @@ class AuthService
         if ($isForceRegenerateCode) {
             $user = $this->userRepository->getByEmail($email);
             if (empty($user)) {
-                throw new BadRequestException("Não foi possível gerar o código de confirmação. Usuário não encontrado.");
+                throw new BadRequestException(
+                    "Não foi possível gerar o código de confirmação. Usuário não encontrado."
+                );
             }
         } else {
             $user = $this->userRepository->getByEmailWithPasswordReset($email);
             if (empty($user)) {
-                throw new BadRequestException("Não foi possível gerar o código de confirmação. Usuário não encontrado ou não possui uma redefinição de senha ativa.");
+                throw new BadRequestException(
+                    "Não foi possível gerar o código de confirmação. Usuário não encontrado ou não possui uma redefinição de senha ativa."
+                );
             }
         }
 
@@ -148,7 +159,11 @@ class AuthService
         $validadeCodigoConfirmacao = $this->generateExpirationTime();
         $codigoConfirmacaoHash = password_hash($codigoConfirmacao, PASSWORD_BCRYPT);
         try {
-            if (!$this->userRepository->updateResetCode($user['id'], $codigoConfirmacaoHash, $validadeCodigoConfirmacao)) {
+            if (!$this->userRepository->updateResetCode(
+                $user['id'],
+                $codigoConfirmacaoHash,
+                $validadeCodigoConfirmacao
+            )) {
                 throw new \Exception();
             }
         } catch (\Exception $e) {
@@ -245,6 +260,49 @@ class AuthService
         $this->savePasswordResetCode($email, true);
 
         return ['expirationInHours' => $this->horasExpirarConfirmacaoSenha];
+    }
+
+    public function resetPassword(
+        string $email,
+        string $codigoConfirmacao,
+        string $senha,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): void {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        // Validação do email: Deve ser um email válido
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new BadRequestException("Email deve ser válido.");
+        }
+
+        if (strlen($senha) < 8 ||
+            !preg_match('/[A-Z]/', $senha) ||       // Pelo menos uma letra maiúscula
+            !preg_match('/[0-9]/', $senha) ||       // Pelo menos um número
+            !preg_match('/[\W]/', $senha)           // Pelo menos um caractere especial
+        ) {
+            throw new BadRequestException(
+                "A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, um número e um caractere especial."
+            );
+        }
+
+        $user = $this->userRepository->getByEmailWithPasswordReset($email);
+        if (
+            empty($user)
+            || !password_verify($codigoConfirmacao, $user['reset_code'])
+            || new DateTime() > new DateTime($user['reset_code_expiry'])
+        ) {
+            throw new BadRequestException("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+        }
+
+        $senha = password_hash($senha, PASSWORD_BCRYPT);
+        try {
+            $this->userRepository->updatePassword($user['id'], $senha);
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Não foi possível atualizar a senha. Tente novamente.", 0, $e);
+        }
     }
 
 

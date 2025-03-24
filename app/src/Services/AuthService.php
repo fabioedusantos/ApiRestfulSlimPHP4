@@ -6,6 +6,7 @@ use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Exceptions\UnauthorizedException;
 use App\Helpers\GoogleRecaptchaHelper;
+use App\Helpers\JwtHelper;
 use App\Helpers\RecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
@@ -305,7 +306,53 @@ class AuthService
         }
     }
 
+    public function login(
+        string $email,
+        string $senha,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): array
+    {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
 
+        $user = $this->userRepository->getByEmail($email);
+        if (empty($user) || !password_verify($senha, $user['senha'])) {
+            throw new UnauthorizedException('Usuário ou senha inválido.');
+        }
+
+        if (!$user['is_active']) {
+            throw new UnauthorizedException(
+                'Necessário confirmar seu email. Use a opção de \"Esqueci a senha\" para recuperar a conta.'
+            );
+        }
+
+        try {
+            if (!$this->userRepository->updateUltimoAcesso($user['id'])) {
+                throw new \Exception();
+            }
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Erro ao atualizar último acesso. Tente novamente.", 0, $e);
+        }
+
+        return $this->generateToken($user['id']);
+    }
+
+
+    private function generateToken(string $userId): array
+    {
+        try {
+            $token = JwtHelper::generateToken($userId, $this->jwtSecret);
+            $refreshToken = JwtHelper::generateRefreshToken($userId, $this->jwtRefreshSecret);
+            return [
+                'token' => $token,
+                'refreshToken' => $refreshToken
+            ];
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Erro ao gerar token. Tente novamente.", 0, $e);
+        }
+    }
     private function generateRandomConfirmationCode(): string
     {
         try {

@@ -117,4 +117,23 @@ class AuthController
 
         return JsonResponse::successNoContent($response);
     }
+
+    public function login(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents(); // Obtém o conteúdo cru do corpo da requisição
+        $data = json_decode($body, true); // Decodifica o JSON manualmente
+
+        $token = $this->authService->login(
+            $data['email'] ?? '',
+            $data['password'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::success(
+            $response,
+            "Login realizado com sucesso.",
+            $token
+        );
+    }
 }

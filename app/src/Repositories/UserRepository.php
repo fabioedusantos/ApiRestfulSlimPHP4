@@ -184,4 +184,19 @@ class UserRepository
             throw $e;
         }
     }
+
+    public function updateUltimoAcesso(string $userId): bool
+    {
+        $stmt = $this->db->prepare(
+            "
+                UPDATE users 
+                SET
+                    penultimo_acesso = ultimo_acesso,
+                    ultimo_acesso = NOW()
+                WHERE id = :id
+            "
+        );
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
+    }
 }

@@ -40,5 +40,10 @@ return function (App $app) {
             '/login',
             [AuthController::class, 'login']
         );
+
+        $group->post(
+            '/refresh_token',
+            [AuthController::class, 'refreshToken']
+        );
     });
 };

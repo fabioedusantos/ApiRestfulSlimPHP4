@@ -11,6 +11,8 @@ use App\Helpers\RecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Predis\Client;
 
 class AuthService
@@ -337,6 +339,23 @@ class AuthService
         }
 
         return $this->generateToken($user['id']);
+    }
+
+    public function refreshToken(string $refreshToken): array
+    {
+        if (empty($refreshToken)) {
+            throw new UnauthorizedException("Refresh token não fornecido.");
+        }
+
+        $decoded = JWT::decode($refreshToken, new Key($this->jwtRefreshSecret, 'HS256'));
+        $userId = $decoded?->sub?->id ?? null;
+
+        //verificar se usuário está ativo e funcional
+        if (empty($userId) || !$this->userRepository->isActive($userId)) {
+            throw new UnauthorizedException("Usuário não autorizado.");
+        }
+
+        return $this->generateToken($userId);
     }
 
 

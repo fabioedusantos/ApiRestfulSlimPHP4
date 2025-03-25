@@ -136,4 +136,20 @@ class AuthController
             $token
         );
     }
+
+    public function refreshToken(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $token = $this->authService->refreshToken(
+            $data['refreshToken'] ?? ''
+        );
+
+        return JsonResponse::success(
+            $response,
+            "Token atualizado realizado com sucesso.",
+            $token
+        );
+    }
 }

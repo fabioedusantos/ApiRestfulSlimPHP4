@@ -68,6 +68,18 @@ class UserRepository
         return !empty($user['id']) ? $user : null;
     }
 
+    public function isActive(string $userId): bool
+    {
+        $sql = "SELECT 
+                    id
+                FROM users WHERE id = :id AND is_active = 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+        $user = $stmt->fetch();
+        return !empty($user['id']);
+    }
+
     public function create(
         string $nome,
         string $sobrenome,

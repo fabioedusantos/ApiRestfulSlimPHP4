@@ -1,6 +1,8 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Middlewares\JwtMiddleware;
+use App\Middlewares\UserActiveMiddleware;
 use Slim\App;
 use Slim\Routing\RouteCollectorProxy;
 
@@ -45,5 +47,10 @@ return function (App $app) {
             '/refresh_token',
             [AuthController::class, 'refreshToken']
         );
+
+        $group->get(
+            '/is_logged_in',
+            [AuthController::class, 'isLoggedIn']
+        )->add(UserActiveMiddleware::class)->add(JwtMiddleware::class);
     });
 };

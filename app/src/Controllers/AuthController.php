@@ -152,4 +152,11 @@ class AuthController
             $token
         );
     }
+    public function isLoggedIn(Request $request, Response $response): Response
+    {
+        $this->authService->isLoggedIn(
+            $request->getAttribute('user')?->sub?->id ?? null
+        );
+        return JsonResponse::successNoContent($response);
+    }
 }

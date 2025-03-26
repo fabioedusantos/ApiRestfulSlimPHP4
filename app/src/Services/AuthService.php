@@ -358,6 +358,17 @@ class AuthService
         return $this->generateToken($userId);
     }
 
+    public function isLoggedIn(string $userId): void
+    {
+        try {
+            if (!$this->userRepository->updateUltimoAcesso($userId)) {
+                throw new \Exception();
+            }
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Erro ao atualizar último acesso. Tente novamente.", 0, $e);
+        }
+    }
+
 
     private function generateToken(string $userId): array
     {

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Exceptions\UnauthorizedException;
+use App\Helpers\FirebaseAuthHelper;
 use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\JwtHelper;
 use App\Helpers\RecaptchaHelper;
@@ -313,8 +314,7 @@ class AuthService
         string $senha,
         string $recaptchaToken,
         string $recaptchaSiteKey
-    ): array
-    {
+    ): array {
         if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
             throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
         }
@@ -369,6 +369,82 @@ class AuthService
         }
     }
 
+    public function signupGoogle(
+        string $firebaseToken,
+        string $nome,
+        string $sobrenome,
+        bool $isTerms,
+        bool $isPolicy,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): array {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        if (!$firebaseToken) {
+            throw new UnauthorizedException("Token Firebase não fornecido.");
+        }
+
+        try {
+            $userFirebase = FirebaseAuthHelper::verificarIdToken($firebaseToken);
+            if (empty($userFirebase)) {
+                throw new UnauthorizedException("Token Firebase inválido ou expirado.");
+            }
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException(
+                "Não foi possível verificar o token Firebase. Tente novamente.",
+                0,
+                $e
+            );
+        }
+
+        if (mb_strlen($nome) < 2) {
+            throw new BadRequestException("Nome muito curto.");
+        }
+
+        if (mb_strlen($sobrenome) < 2) {
+            throw new BadRequestException("Sobrenome muito curto.");
+        }
+
+        // Verificar se o email já existe no banco de dados
+        $user = $this->userRepository->getByEmail($userFirebase->email);
+        if (!empty($user['id'])) {
+            throw new BadRequestException("Email já cadastrado.");
+        }
+
+        if (!$isTerms) {
+            throw new BadRequestException("Aceite os termos e condições para se cadastrar.");
+        }
+
+        if (!$isPolicy) {
+            throw new BadRequestException("Aceite a política de privacidade para se cadastrar.");
+        }
+
+        try {
+            $photoBlob = null;
+            if (!empty($userFirebase->photoUrl)) {
+                $photoBlob = Util::urlFotoToBlob($userFirebase->photoUrl);
+            }
+
+            $userId = $this->userRepository->createByGoogle(
+                $nome,
+                $sobrenome,
+                $photoBlob,
+                $userFirebase->email,
+                $userFirebase->uid
+            );
+
+            if (empty($userId)) {
+                throw new \Exception();
+            }
+
+            return $this->generateToken($userId);
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Erro ao criar usuário. Tente novamente.", 0, $e);
+        }
+    }
+
 
     private function generateToken(string $userId): array
     {
@@ -383,6 +459,7 @@ class AuthService
             throw new InternalServerErrorException("Erro ao gerar token. Tente novamente.", 0, $e);
         }
     }
+
     private function generateRandomConfirmationCode(): string
     {
         try {

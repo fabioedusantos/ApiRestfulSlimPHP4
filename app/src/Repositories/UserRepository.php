@@ -211,4 +211,27 @@ class UserRepository
         $stmt->bindParam(':id', $userId);
         return $stmt->execute();
     }
+
+    public function createByGoogle(
+        string $nome,
+        string $sobrenome,
+        ?string $photoBlob,
+        string $email,
+        string $firebaseUid
+    ): ?string {
+        $uuid = Uuid::uuid4()->toString();
+
+        $sql = "INSERT INTO users (id, nome, sobrenome, photo_blob, email, firebase_uid, termos_aceito_em, 
+                    politica_aceita_em, is_active)
+                VALUES (:id, :nome, :sobrenome, :photo_blob, :email, :firebase_uid, NOW(), NOW(), 1)";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $uuid);
+        $stmt->bindParam(':nome', $nome);
+        $stmt->bindParam(':sobrenome', $sobrenome);
+        $stmt->bindParam(':photo_blob', $photoBlob, PDO::PARAM_LOB);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':firebase_uid', $firebaseUid);
+
+        return $stmt->execute() ? $uuid : null;
+    }
 }

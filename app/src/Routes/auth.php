@@ -52,5 +52,11 @@ return function (App $app) {
             '/is_logged_in',
             [AuthController::class, 'isLoggedIn']
         )->add(UserActiveMiddleware::class)->add(JwtMiddleware::class);
+
+        //google
+        $group->post(
+            '/google/signup',
+            [AuthController::class, 'signUpGoogle']
+        );
     });
 };

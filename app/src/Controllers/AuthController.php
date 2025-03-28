@@ -159,4 +159,27 @@ class AuthController
         );
         return JsonResponse::successNoContent($response);
     }
+
+    //google
+    public function signUpGoogle(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $token = $this->authService->signupGoogle(
+            $data['idTokenFirebase'] ?? '',
+            $data['name'] ?? '',
+            $data['lastname'] ?? '',
+            !empty($data['isTerms']),
+            !empty($data['isPolicy']),
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::created(
+            $response,
+            "Conta criada e logada com sucesso.",
+            $token
+        );
+    }
 }

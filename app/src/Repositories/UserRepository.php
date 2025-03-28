@@ -68,6 +68,30 @@ class UserRepository
         return !empty($user['id']) ? $user : null;
     }
 
+    public function getByFirebaseUid(string $firebaseUid): ?array
+    {
+        $sql = "SELECT 
+                    id,
+                    nome,
+                    sobrenome,
+                    photo_blob,
+                    email,
+                    senha,
+                    firebase_uid,
+                    termos_aceito_em,
+                    politica_aceita_em,
+                    is_active,
+                    penultimo_acesso,
+                    ultimo_acesso,
+                    criado_em,
+                    alterado_em
+                FROM users WHERE firebase_uid = :firebase_uid";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':firebase_uid', $firebaseUid);
+        $stmt->execute();
+        return $stmt->fetch() ?: null;
+    }
+
     public function isActive(string $userId): bool
     {
         $sql = "SELECT 
@@ -233,5 +257,21 @@ class UserRepository
         $stmt->bindParam(':firebase_uid', $firebaseUid);
 
         return $stmt->execute() ? $uuid : null;
+    }
+
+    public function updatePhotoBlob(
+        string $userId,
+        string $photoBlob
+    ): bool {
+        $stmt = $this->db->prepare(
+            "
+                UPDATE users 
+                SET photo_blob = :photo_blob
+                WHERE id = :id
+            "
+        );
+        $stmt->bindParam(':photo_blob', $photoBlob, PDO::PARAM_LOB);
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
     }
 }

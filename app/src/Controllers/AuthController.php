@@ -182,4 +182,22 @@ class AuthController
             $token
         );
     }
+
+    public function loginGoogle(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents(); // Obtém o conteúdo cru do corpo da requisição
+        $data = json_decode($body, true); // Decodifica o JSON manualmente
+
+        $token = $this->authService->loginGoogle(
+            $data['idTokenFirebase'] ?? '',
+            $data['recaptchaToken'] ?? '',
+            $data['recaptchaSiteKey'] ?? ''
+        );
+
+        return JsonResponse::success(
+            $response,
+            "Login realizado com sucesso.",
+            $token
+        );
+    }
 }

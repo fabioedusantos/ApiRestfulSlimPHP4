@@ -445,6 +445,57 @@ class AuthService
         }
     }
 
+    public function loginGoogle(
+        string $firebaseToken,
+        string $recaptchaToken,
+        string $recaptchaSiteKey
+    ): array {
+        if (!GoogleRecaptchaHelper::isValid($recaptchaToken, $recaptchaSiteKey)) {
+            throw new UnauthorizedException("Não foi possível validar sua ação. Tente novamente.");
+        }
+
+        if (empty($firebaseToken)) {
+            throw new UnauthorizedException("Token não fornecido.");
+        }
+
+        $userFirebase = FirebaseAuthHelper::verificarIdToken($firebaseToken);
+        if (empty($userFirebase)) {
+            throw new UnauthorizedException("Token Firebase inválido ou expirado.");
+        }
+
+        $user = $this->userRepository->getByFirebaseUid($userFirebase->uid);
+        if (empty($user['id'])) {
+            throw new UnauthorizedException("Conta inexistente. Favor criar a conta primeiro.");
+        }
+
+        if (!$user['is_active']) {
+            throw new UnauthorizedException(
+                'Necessário confirmar seu email. Use a opção de \"Esqueci a senha\" para recuperar a conta.'
+            );
+        }
+
+        if (!empty($userFirebase->photoUrl)) {
+            try {
+                $photoBlob = Util::urlFotoToBlob($userFirebase->photoUrl);
+                if (empty($photoBlob) || !$this->userRepository->updatePhotoBlob($user['id'], $photoBlob)) {
+                    throw new \Exception();
+                }
+            } catch (\Exception $e) {
+                throw new InternalServerErrorException("Erro ao atualizar foto de perfil. Tente novamente.", 0, $e);
+            }
+        }
+
+        try {
+            if (!$this->userRepository->updateUltimoAcesso($user['id'])) {
+                throw new \Exception();
+            }
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException("Erro ao atualizar último acesso. Tente novamente.", 0, $e);
+        }
+
+        return $this->generateToken($user['id']);
+    }
+
 
     private function generateToken(string $userId): array
     {

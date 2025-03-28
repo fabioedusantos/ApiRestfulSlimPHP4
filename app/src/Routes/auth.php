@@ -58,5 +58,10 @@ return function (App $app) {
             '/google/signup',
             [AuthController::class, 'signUpGoogle']
         );
+
+        $group->post(
+            '/google/login',
+            [AuthController::class, 'loginGoogle']
+        );
     });
 };

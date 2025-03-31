@@ -92,6 +92,30 @@ class UserRepository
         return $stmt->fetch() ?: null;
     }
 
+    public function getByUserId(string $userId): ?array
+    {
+        $sql = "SELECT 
+                    id,
+                    nome,
+                    sobrenome,
+                    photo_blob,
+                    email,
+                    senha,
+                    firebase_uid,
+                    termos_aceito_em,
+                    politica_aceita_em,
+                    is_active,
+                    penultimo_acesso,
+                    ultimo_acesso,
+                    criado_em,
+                    alterado_em
+                FROM users WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $userId);
+        $stmt->execute();
+        return $stmt->fetch() ?: null;
+    }
+
     public function isActive(string $userId): bool
     {
         $sql = "SELECT 

@@ -3,6 +3,7 @@
 namespace App\Middlewares;
 
 use App\Exceptions\UnauthorizedException;
+use App\Helpers\Util;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -21,7 +22,7 @@ class JwtMiddleware
     private string $jwtSecret;
     public function __construct()
     {
-        $this->jwtSecret = $_ENV['JWT_SECRET'] ?? '';
+        $this->jwtSecret = Util::getEnv("JWT_SECRET") ?? '';
     }
 
     public function __invoke(Request $request, Handler $handler): Response

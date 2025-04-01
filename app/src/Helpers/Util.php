@@ -108,4 +108,36 @@ class Util
             throw new \Exception("Erro ao baixar imagem: " . $e->getMessage());
         }
     }
+
+    /**
+     * Converte uma string base64 com prefixo "data:image/..." para um BLOB binário.
+     *
+     * Este método recebe uma string base64 de uma imagem e a converte em uma string binária (BLOB),
+     * verificando se a base64 é válida e se é uma imagem compatível (JPEG, PNG ou GIF).
+     *
+     * @param string $photoBlob A string base64 da imagem a ser convertida.
+     *
+     * @return string|null O conteúdo da imagem em formato binário (BLOB) ou `null` em caso de falha.
+     *
+     * @throws Exception Se a base64 for inválida ou o conteúdo não for uma imagem válida.
+     */
+    public static function photoBase64ToBlob(string $photoBlob): ?string
+    {
+        // Decodifica
+        $binaryData = base64_decode($photoBlob, true);
+        if ($binaryData === false) {
+            throw new Exception("Base64 inválido.");
+        }
+
+        // Verifica se é uma imagem válida
+        $finfo = finfo_open();
+        $mimeType = finfo_buffer($finfo, $binaryData, FILEINFO_MIME_TYPE);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
+            throw new Exception("Conteúdo não é uma imagem válida.");
+        }
+
+        return $binaryData;
+    }
 }

@@ -298,4 +298,52 @@ class UserRepository
         $stmt->bindParam(':id', $userId);
         return $stmt->execute();
     }
+
+    public function updateProfile(
+        string $userId,
+        ?string $nome,
+        ?string $sobrenome,
+        ?string $hashSenha,
+        ?string $photoBlob,
+        bool $isRemovePhoto
+    ): bool {
+        $query = "UPDATE users SET alterado_em = NOW()";
+        $params = [];
+
+        if ($nome) {
+            $query .= ", nome = :nome";
+            $query .= ", sobrenome = :sobrenome";
+            $params[':nome']['value'] = $nome;
+            $params[':sobrenome']['value'] = $sobrenome;
+        }
+
+        if ($hashSenha) {
+            $query .= ", senha = :senha";
+            $params[':senha']['value'] = $hashSenha;
+        }
+
+        if ($isRemovePhoto) {
+            $query .= ", photo_blob = NULL";
+        } else {
+            if ($photoBlob) {
+                $query .= ", photo_blob = :photo_blob";
+                $params[':photo_blob'] = [
+                    'value' => $photoBlob,
+                    'param' => PDO::PARAM_LOB
+                ];
+            }
+        }
+
+        $query .= " WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        foreach ($params as $param => $data) {
+            if (!empty($data['param'])) {
+                $stmt->bindParam($param, $data['value'], $data['param']);
+            } else {
+                $stmt->bindParam($param, $data['value']);
+            }
+        }
+        $stmt->bindParam(':id', $userId);
+        return $stmt->execute();
+    }
 }

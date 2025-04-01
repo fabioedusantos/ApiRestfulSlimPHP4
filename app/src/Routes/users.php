@@ -12,5 +12,10 @@ return function (App $app) {
             '/me',
             [UserController::class, 'get']
         );
+
+        $group->patch(
+            '/me',
+            [UserController::class, 'set']
+        );
     })->add(UserActiveMiddleware::class)->add(JwtMiddleware::class);
 };

@@ -19,4 +19,20 @@ class UserController
         return JsonResponse::success($response, "Sucesso.", $user);
     }
 
+    public function set(Request $request, Response $response): Response
+    {
+        $body = $request->getBody()->getContents();
+        $data = json_decode($body, true);
+
+        $this->userService->set(
+            $request->getAttribute('user')?->sub?->id ?? null,
+            $data['name'] ?? '',
+            $data['lastname'] ?? '',
+            $data['password'] ?? '',
+            $data['photoBlob'] ?? '',
+            $data['isRemovePhoto'] ?? false
+        );
+
+        return JsonResponse::successNoContent($response);
+    }
 }

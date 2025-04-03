@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\NotificationController;
 use App\Controllers\UserController;
 use App\Helpers\Util;
 use App\Middlewares\JwtMiddleware;
@@ -8,6 +9,7 @@ use App\Middlewares\UserActiveMiddleware;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 
+use App\Services\NotificationService;
 use App\Services\UserService;
 use Predis\Client;
 
@@ -43,7 +45,9 @@ return [
 
     AuthService::class => autowire(AuthService::class),
     UserService::class => autowire(UserService::class),
+    NotificationService::class => autowire(NotificationService::class),
 
     AuthController::class => autowire(AuthController::class),
     UserController::class => autowire(UserController::class),
+    NotificationController::class => autowire(NotificationController::class),
 ];

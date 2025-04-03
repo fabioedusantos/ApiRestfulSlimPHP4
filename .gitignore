@@ -2,5 +2,6 @@
 
 /store/.env
 /store/recaptcha_google_key.json
+/store/firebase_key.json
 
 /app/vendor

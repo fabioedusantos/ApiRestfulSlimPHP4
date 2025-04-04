@@ -168,7 +168,11 @@ class UserRepository
         }
     }
 
-    function updateResetCode(string $userId, string $hashResetCode, string $validadeResetCode): bool
+    function updateResetCode(
+        string $userId,
+        string $hashResetCode,
+        string $validadeResetCode
+    ): bool
     {
         $stmt = $this->db->prepare(
             "UPDATE user_password_resets SET reset_code = :code, reset_code_expiry = :expiry WHERE user_id = :id"
@@ -212,7 +216,10 @@ class UserRepository
         }
     }
 
-    public function updatePassword(string $userId, string $hashSenha): void
+    public function updatePassword(
+        string $userId,
+        string $hashSenha
+    ): void
     {
         try {
             $this->db->beginTransaction();

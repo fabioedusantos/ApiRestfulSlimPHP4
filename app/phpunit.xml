@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit bootstrap="tests/bootstrap.php" backupGlobals="false" backupStaticAttributes="false">
+    <!-- Define os testes que o PHPUnit irá rodar -->
+    <testsuites>
+        <testsuite name="API Test Suite">
+            <directory>./tests</directory>  <!-- Diretório onde estão os testes -->
+        </testsuite>
+    </testsuites>
+
+    <!-- Definir cobertura de código -->
+    <coverage>
+        <include>
+            <directory>./app</directory>  <!-- Diretorio de código a ser monitorado para cobertura -->
+        </include>
+    </coverage>
+
+</phpunit>

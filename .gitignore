@@ -5,3 +5,4 @@
 /store/firebase_key.json
 
 /app/vendor
+/app/.phpunit.result.cache

@@ -162,4 +162,70 @@ class UserRepositoryTest extends TestCase
 
         $this->assertArrayHasKey('alterado_em', $user);
     }
+
+    public function testGetByEmailWithPasswordResetSucesso(): void
+    {
+        $this->testCreateSucesso();
+
+        $user = $this->userRepository->getByEmailWithPasswordReset(
+            $this->userData['email']
+        );
+
+        $this->assertNotEmpty($user);
+        $this->assertIsArray($user);
+
+        $this->assertArrayHasKey('id', $user);
+        $this->assertNotEmpty($user['id']);
+        $this->assertIsString($user['id']);
+
+        $this->assertArrayHasKey('nome', $user);
+        $this->assertNotEmpty($user['nome']);
+        $this->assertIsString($user['nome']);
+
+        $this->assertArrayHasKey('sobrenome', $user);
+        $this->assertNotEmpty($user['sobrenome']);
+        $this->assertIsString($user['sobrenome']);
+
+        $this->assertArrayHasKey('photo_blob', $user);
+
+        $this->assertArrayHasKey('email', $user);
+        $this->assertNotEmpty($user['email']);
+        $this->assertIsString($user['email']);
+
+        $this->assertArrayHasKey('senha', $user);
+        $this->assertNotEmpty($user['senha']);
+        $this->assertIsString($user['senha']);
+
+        $this->assertArrayHasKey('firebase_uid', $user);
+
+        $this->assertArrayHasKey('termos_aceito_em', $user);
+        $this->assertNotEmpty($user['termos_aceito_em']);
+        $this->assertIsString($user['termos_aceito_em']);
+
+        $this->assertArrayHasKey('politica_aceita_em', $user);
+        $this->assertNotEmpty($user['politica_aceita_em']);
+        $this->assertIsString($user['politica_aceita_em']);
+
+        $this->assertArrayHasKey('is_active', $user);
+        $this->assertEquals(0, $user['is_active']);
+        $this->assertIsNumeric($user['is_active']);
+
+        $this->assertArrayHasKey('penultimo_acesso', $user);
+
+        $this->assertArrayHasKey('ultimo_acesso', $user);
+
+        $this->assertArrayHasKey('criado_em', $user);
+        $this->assertNotEmpty($user['criado_em']);
+        $this->assertIsString($user['criado_em']);
+
+        $this->assertArrayHasKey('alterado_em', $user);
+
+        $this->assertArrayHasKey('reset_code', $user);
+        $this->assertNotEmpty($user['reset_code']);
+        $this->assertIsString($user['reset_code']);
+
+        $this->assertArrayHasKey('reset_code', $user);
+        $this->assertNotEmpty($user['reset_code']);
+        $this->assertIsString($user['reset_code_expiry']);
+    }
 }

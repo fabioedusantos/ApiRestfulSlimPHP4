@@ -2,6 +2,7 @@
 
 namespace Tests\Repositories;
 
+use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;
 use Kreait\Firebase\Auth\UserRecord;
@@ -227,5 +228,76 @@ class UserRepositoryTest extends TestCase
         $this->assertArrayHasKey('reset_code', $user);
         $this->assertNotEmpty($user['reset_code']);
         $this->assertIsString($user['reset_code_expiry']);
+    }
+    public function testCreateGoogleSucesso(): string
+    {
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $email = $this->userData['email'];
+        $firebaseUid = $this->firebaseUserData->uid;
+
+        $newUserId = $this->userRepository->createByGoogle(
+            $nome,
+            $sobrenome,
+            $photoBlob,
+            $email,
+            $firebaseUid
+        );
+
+        $this->assertNotEmpty($newUserId);
+        $this->assertIsString($newUserId);
+
+        $userFromDb = $this->userRepository->getByUserId($newUserId);
+        $this->assertEquals($newUserId, $userFromDb['id']);
+        $this->assertEquals($nome, $userFromDb['nome']);
+        $this->assertEquals($sobrenome, $userFromDb['sobrenome']);
+        $this->assertEquals($photoBlob, $userFromDb['photo_blob']);
+        $this->assertEquals($email, $userFromDb['email']);
+        $this->assertEquals($firebaseUid, $userFromDb['firebase_uid']);
+
+        return $newUserId;
+    }
+
+    public function testCreateGoogleFalhaEmailDuplicado(): void
+    {
+        $this->testCreateGoogleSucesso();
+
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $email = $this->userData['email'];
+        $firebaseUid = $this->firebaseUserData->uid;
+
+        $this->expectExceptionMessage("Integrity constraint violation: 1062 Duplicate");
+
+        $this->userRepository->createByGoogle(
+            $nome,
+            $sobrenome,
+            $photoBlob,
+            $email,
+            $firebaseUid
+        );
+    }
+
+    public function testCreateGoogleFirebaseUidDuplicado(): void
+    {
+        $this->testCreateGoogleSucesso();
+
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $email = $this->userData['email'] . ".br";
+        $firebaseUid = $this->firebaseUserData->uid;
+
+        $this->expectExceptionMessage("Integrity constraint violation: 1062 Duplicate entry");
+
+        $this->userRepository->createByGoogle(
+            $nome,
+            $sobrenome,
+            $photoBlob,
+            $email,
+            $firebaseUid
+        );
     }
 }

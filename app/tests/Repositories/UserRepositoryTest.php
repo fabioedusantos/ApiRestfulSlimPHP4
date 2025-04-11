@@ -416,4 +416,29 @@ class UserRepositoryTest extends TestCase
 
         $this->assertArrayHasKey('alterado_em', $user);
     }
+
+    public function testIsActiveSucesso(): void
+    {
+        $userId = $this->testCreateGoogleSucesso();
+
+        $isSuccess = $this->userRepository->isActive(
+            $userId
+        );
+
+        $this->assertNotEmpty($isSuccess);
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+    }
+
+    public function testIsActiveFalhaUsuarioInativo(): void
+    {
+        $userId = $this->testCreateSucesso();
+
+        $isSuccess = $this->userRepository->isActive(
+            $userId
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertFalse($isSuccess);
+    }
 }

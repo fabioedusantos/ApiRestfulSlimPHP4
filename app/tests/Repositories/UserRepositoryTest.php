@@ -441,4 +441,23 @@ class UserRepositoryTest extends TestCase
         $this->assertIsBool($isSuccess);
         $this->assertFalse($isSuccess);
     }
+    public function testUpdateResetCodeSucesso(): void
+    {
+        $userId = $this->testCreateSucesso();
+        $hashResetCode = password_hash("123456", PASSWORD_BCRYPT);
+        $resetCodeExpiry = $this->generateExpirationTime();
+
+        $isSuccess = $this->userRepository->updateResetCode(
+            $userId,
+            $hashResetCode,
+            $resetCodeExpiry,
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+
+        $userFromDb = $this->userRepository->getByEmailWithPasswordReset($this->userData['email']);
+        $this->assertEquals($hashResetCode, $userFromDb['reset_code']);
+        $this->assertEquals($resetCodeExpiry, $userFromDb['reset_code_expiry']);
+    }
 }

@@ -441,6 +441,7 @@ class UserRepositoryTest extends TestCase
         $this->assertIsBool($isSuccess);
         $this->assertFalse($isSuccess);
     }
+
     public function testUpdateResetCodeSucesso(): void
     {
         $userId = $this->testCreateSucesso();
@@ -459,5 +460,19 @@ class UserRepositoryTest extends TestCase
         $userFromDb = $this->userRepository->getByEmailWithPasswordReset($this->userData['email']);
         $this->assertEquals($hashResetCode, $userFromDb['reset_code']);
         $this->assertEquals($resetCodeExpiry, $userFromDb['reset_code_expiry']);
+    }
+
+    public function testActivateSucesso(): void
+    {
+        $userId = $this->testCreateSucesso();
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEquals(0, $userFromDb['is_active']);
+
+        $this->userRepository->activate(
+            $userId
+        );
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEquals(1, $userFromDb['is_active']);
     }
 }

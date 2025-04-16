@@ -475,4 +475,18 @@ class UserRepositoryTest extends TestCase
         $userFromDb = $this->userRepository->getByUserId($userId);
         $this->assertEquals(1, $userFromDb['is_active']);
     }
+
+    public function testUpdatePasswordSucesso(): void
+    {
+        $userId = $this->testCreateSucesso();
+        $hashSenha = password_hash("JABULANI@123!@#", PASSWORD_BCRYPT);
+
+        $this->userRepository->updatePassword(
+            $userId,
+            $hashSenha
+        );
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEquals($hashSenha, $userFromDb['senha']);
+    }
 }

@@ -489,4 +489,22 @@ class UserRepositoryTest extends TestCase
         $userFromDb = $this->userRepository->getByUserId($userId);
         $this->assertEquals($hashSenha, $userFromDb['senha']);
     }
+
+    public function testUpdateUltimoAcessoSucesso(): void
+    {
+        $userId = $this->testCreateSucesso();
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEmpty($userFromDb['ultimo_acesso']);
+
+        $isSuccess = $this->userRepository->updateUltimoAcesso(
+            $userId
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertNotEmpty($userFromDb['ultimo_acesso']);
+    }
 }

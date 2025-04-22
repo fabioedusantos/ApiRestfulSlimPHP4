@@ -507,4 +507,26 @@ class UserRepositoryTest extends TestCase
         $userFromDb = $this->userRepository->getByUserId($userId);
         $this->assertNotEmpty($userFromDb['ultimo_acesso']);
     }
+
+    public function testUpdatePhotoBlobSucesso(): string
+    {
+        $userId = $this->testCreateSucesso();
+        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEmpty($userFromDb['photo_blob']);
+
+        $isSuccess = $this->userRepository->updatePhotoBlob(
+            $userId,
+            $photoBlob
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEquals($photoBlob, $userFromDb['photo_blob']);
+
+        return $userId;
+    }
 }

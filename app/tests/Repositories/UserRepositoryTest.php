@@ -529,4 +529,58 @@ class UserRepositoryTest extends TestCase
 
         return $userId;
     }
+
+    public function testUpdateProfileSucesso(): void
+    {
+        $userId = $this->testCreateSucesso();
+        $nome = "José";
+        $sobrenome = "Nildo";
+        $hashSenha = password_hash("JoseNildo@123!@#$", PASSWORD_BCRYPT);
+        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEmpty($userFromDb['photo_blob']);
+        //outros testes já são feitos em testCreateSucesso()
+
+        $isSuccess = $this->userRepository->updateProfile(
+            $userId,
+            $nome,
+            $sobrenome,
+            $hashSenha,
+            $photoBlob,
+            false
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEquals($nome, $userFromDb['nome']);
+        $this->assertEquals($sobrenome, $userFromDb['sobrenome']);
+        $this->assertEquals($hashSenha, $userFromDb['senha']);
+        $this->assertEquals($photoBlob, $userFromDb['photo_blob']);
+    }
+
+    public function testUpdateProfileRemoverFotoSucesso(): void
+    {
+        $userId = $this->testUpdatePhotoBlobSucesso();
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertNotEmpty($userFromDb['photo_blob']);
+
+        $isSuccess = $this->userRepository->updateProfile(
+            $userId,
+            null,
+            null,
+            null,
+            null,
+            true
+        );
+
+        $this->assertIsBool($isSuccess);
+        $this->assertTrue($isSuccess);
+
+        $userFromDb = $this->userRepository->getByUserId($userId);
+        $this->assertEmpty($userFromDb['photo_blob']);
+    }
 }

@@ -8,7 +8,6 @@ use App\Exceptions\UnauthorizedException;
 use App\Helpers\FirebaseAuthHelper;
 use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\JwtHelper;
-use App\Helpers\RecaptchaHelper;
 use App\Helpers\Util;
 use App\Repositories\UserRepository;
 use DateTime;

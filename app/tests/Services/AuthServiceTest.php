@@ -150,4 +150,46 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testSignupFalhaNome(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Nome muito curto.");
+
+        $this->authService->signup(
+            "F",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testSignupFalhaSobrenome(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Sobrenome muito curto.");
+
+        $this->authService->signup(
+            "Fábio",
+            "S",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

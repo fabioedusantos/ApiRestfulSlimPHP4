@@ -192,4 +192,48 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupFalhaEmail(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Email deve ser válido.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabão@doemaião",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testSignupFalhaSenha(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage(
+            "A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, um número e um caractere especial."
+        );
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "PipoquinhaAçucarada",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

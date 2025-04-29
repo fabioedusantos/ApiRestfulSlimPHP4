@@ -236,4 +236,50 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupEmailJaCadastrado(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+
+        $this->expectExceptionMessage("Email já cadastrado.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testSignupFalhaTermos(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+
+        $this->expectExceptionMessage("Aceite os termos e condições para se cadastrar.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            false,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

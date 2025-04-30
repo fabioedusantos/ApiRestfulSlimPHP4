@@ -282,4 +282,52 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupFalhaPolitica(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+
+        $this->expectExceptionMessage("Aceite a política de privacidade para se cadastrar.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            false,
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testSignupFalhaCriarUsuarioException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+        $this->userRepository->method('create')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->expectExceptionMessage("Erro ao criar usuário. Tente novamente.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

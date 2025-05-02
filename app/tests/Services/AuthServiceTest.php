@@ -330,4 +330,51 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupFalhaEnviarEmail(): void
+    {
+        $nome = "Fábio";
+        $sobrenome = "Santos";
+        $email = "fabioedusantos@gmail.com";
+        $senha = "Senha@123!";
+        $isTerms = true;
+        $isPolicy = true;
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository
+            ->method('getByEmail')
+            ->willReturn(null);
+
+        $this->userRepository->expects($this->once())
+            ->method('create');
+
+        $this->redisClient->expects($this->once())
+            ->method('rpush')
+            ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
+
+        $this->expectExceptionMessage(
+            "Não foi possível enviar o email com o código por uma falha interna. Tente novamente."
+        );
+
+        $info = $this->authService->signup(
+            $nome,
+            $sobrenome,
+            $email,
+            $senha,
+            $isTerms,
+            $isPolicy,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        $this->assertIsArray($info);
+        $this->assertArrayHasKey('expirationInHours', $info);
+        $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
+    }
 }

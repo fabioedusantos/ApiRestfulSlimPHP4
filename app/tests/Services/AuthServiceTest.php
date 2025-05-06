@@ -461,4 +461,20 @@ class AuthServiceTest extends TestCase
         $this->assertArrayHasKey('expirationInHours', $info);
         $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
     }
+
+    public function testResendConfirmEmailFalhaRecaptcha(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(false);
+
+        $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
+
+        $this->authService->resendConfirmEmail(
+            "fabioedusantos@gmail.com",
+            "",
+            ""
+        );
+    }
 }

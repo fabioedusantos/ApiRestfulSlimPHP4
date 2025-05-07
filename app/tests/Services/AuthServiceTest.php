@@ -477,4 +477,20 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testResendConfirmEmailFalhaEmail(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Email deve ser válido.");
+
+        $this->authService->resendConfirmEmail(
+            "fabão@doemaião",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

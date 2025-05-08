@@ -493,4 +493,50 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResendConfirmEmailFalhaUsuarioNaoEncontrado(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(null);
+
+        $this->expectExceptionMessage(
+            "Não foi possível gerar o código de confirmação. Usuário não encontrado ou não possui uma redefinição de senha ativa."
+        );
+
+        $this->authService->resendConfirmEmail(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testResendConfirmEmailFalhaContaFirebase(): void
+    {
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
+            $this->userData +
+            [
+                'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+            ]
+        );
+
+        $this->expectExceptionMessage("Não é possível redefinir senha de conta Firebase/Google.");
+
+        $this->authService->resendConfirmEmail(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

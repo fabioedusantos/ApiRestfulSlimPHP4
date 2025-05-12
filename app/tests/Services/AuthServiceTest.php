@@ -567,4 +567,34 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResendConfirmEmailFalhaGerarCodigoConfirmacaoException(): void
+    {
+        $this->userData['firebase_uid'] = null;
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
+            $this->userData +
+            [
+                'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+            ]
+        );
+        $this->userRepository->method('updateResetCode')->willThrowException(
+            new \PDOException("Erro no banco de dados XPTO")
+        );
+
+        $this->expectExceptionMessage("Não foi possível salvar o código de confirmação. Tente novamente.");
+
+        $this->authService->resendConfirmEmail(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

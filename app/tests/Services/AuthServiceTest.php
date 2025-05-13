@@ -597,4 +597,53 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResendConfirmEmailFalhaEnviarEmail(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+
+        $this->userData['firebase_uid'] = null;
+
+        $this->userRepository
+            ->method('getByEmailWithPasswordReset')
+            ->willReturn(
+                $this->userData +
+                [
+                    'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                    'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+                ]
+            );
+
+        $this->userRepository
+            ->method('updateResetCode')
+            ->willReturn(true);
+
+        $this->redisClient->expects($this->once())
+            ->method('rpush')
+            ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
+
+        $this->expectExceptionMessage(
+            "Não foi possível enviar o email com o código por uma falha interna. Tente novamente."
+        );
+
+        $info = $this->authService->resendConfirmEmail(
+            $email,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        $this->assertIsArray($info);
+
+        $this->assertArrayHasKey('expirationInHours', $info);
+        $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
+    }
 }

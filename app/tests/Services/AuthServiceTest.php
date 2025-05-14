@@ -646,4 +646,80 @@ class AuthServiceTest extends TestCase
         $this->assertArrayHasKey('expirationInHours', $info);
         $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
     }
+
+
+    // forgotPassword()
+    public function testForgotPasswordSucesso(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $this->userData['firebase_uid'] = null;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($this->equalTo($email))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateResetCode')
+            ->with(
+                $this->equalTo($this->userData['id']),
+                $this->callback(function ($codigoConfirmacao) {
+                    return Valid::isStringWithContent($codigoConfirmacao);
+                }),
+                $this->callback(function ($expiry) {
+                    return Valid::isStringDateTime($expiry);
+                })
+            )
+            ->willReturn(true);
+
+
+        $this->redisClient->expects($this->once())
+            ->method('rpush')
+            ->with(
+                $this->equalTo("email_queue"),
+                $this->callback(function ($json) use ($email) {
+                    $json = json_decode($json[0], true);
+                    if (empty($json['type']) || $json['type'] != "passwordReset") {
+                        return false;
+                    }
+                    if (empty($json['email']) || $json['email'] != $email) {
+                        return false;
+                    }
+                    if (empty($json['nome']) || $json['nome'] != $this->userData['nome']) {
+                        return false;
+                    }
+                    if (empty($json['codigo']) || !ctype_digit($json['codigo'])) {
+                        return false;
+                    }
+                    if (empty($json['tempoDuracao']) || strlen($json['tempoDuracao']) <= 3) {
+                        return false;
+                    }
+                    return true;
+                })
+            )
+            ->willReturn(1);
+
+        $info = $this->authService->forgotPassword(
+            $email,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        $this->assertIsArray($info);
+
+        $this->assertArrayHasKey('expirationInHours', $info);
+        $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
+    }
 }

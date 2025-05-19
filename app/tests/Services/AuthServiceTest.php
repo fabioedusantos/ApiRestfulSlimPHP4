@@ -754,4 +754,22 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testForgotPasswordFalhaUsuarioNaoEncontrado(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+
+        $this->expectExceptionMessage("Não foi possível gerar o código de confirmação. Usuário não encontrado.");
+
+        $this->authService->forgotPassword(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

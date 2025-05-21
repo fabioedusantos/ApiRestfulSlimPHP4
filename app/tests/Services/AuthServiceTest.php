@@ -790,4 +790,22 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testForgotPasswordFalhaGerarCodigoConfirmacao(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+
+        $this->expectExceptionMessage("Não é possível redefinir senha de conta Firebase/Google.");
+
+        $this->authService->forgotPassword(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

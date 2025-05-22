@@ -808,4 +808,26 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testForgotPasswordFalhaGerarCodigoConfirmacaoException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userData['firebase_uid'] = null;
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+        $this->userRepository->method('updateResetCode')->willThrowException(
+            new \PDOException("Erro no banco de dados XPTO")
+        );
+
+        $this->expectExceptionMessage("Não foi possível salvar o código de confirmação. Tente novamente.");
+
+        $this->authService->forgotPassword(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

@@ -830,4 +830,45 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testForgotPasswordFalhaEnviarEmail(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $this->userData['firebase_uid'] = null;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository
+            ->method('getByEmail')
+            ->willReturn($this->userData);
+
+        $this->userRepository
+            ->method('updateResetCode')
+            ->willReturn(true);
+
+        $this->redisClient->expects($this->once())
+            ->method('rpush')
+            ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
+
+        $this->expectExceptionMessage(
+            "Não foi possível enviar o email com o código por uma falha interna. Tente novamente."
+        );
+
+        $info = $this->authService->forgotPassword(
+            $email,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        $this->assertIsArray($info);
+
+        $this->assertArrayHasKey('expirationInHours', $info);
+        $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
+    }
 }

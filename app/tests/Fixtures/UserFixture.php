@@ -2,21 +2,16 @@
 
 namespace Tests\Fixtures;
 
-use App\Helpers\Util;
 use DateTimeImmutable;
+use Exception;
 use Kreait\Firebase\Auth\UserMetaData;
 use Kreait\Firebase\Auth\UserRecord;
 
 trait UserFixture
 {
-    protected function getUserData(): array
+    private function getPhotoBase64ToBlob(): ?string
     {
-        return [
-            'id' => 'testuidt-estu-idte-stui-dtestuidtest',
-            'nome' => 'Fábio',
-            'sobrenome' => 'Santos',
-            'photo_blob' => Util::photoBase64ToBlob(
-                "iVBORw0KGgoAAAANSUhEUgAAAGAAAACACAIAAAB7vvvtAAAAAXNSR0IArs4c6QAAAANzQklUCAgI
+        $photoBlob = "iVBORw0KGgoAAAANSUhEUgAAAGAAAACACAIAAAB7vvvtAAAAAXNSR0IArs4c6QAAAANzQklUCAgI
 2+FP4AAAIABJREFUeJyMvVnMbddxJvZVrbX3PsM/3XniTEqUREl2q62hPSGC0e3YaHdgOWnEMOA8
 2GkEFnlJ+S1AHgIEyEseQt1LOWr0QxArQuJ2u+Vux3I7smwpkS3ZljVLlCiKpEjeyzv/w5n23mtV
 VR5q733OvbKU3iQuzn+GfdaqVavqq69q1aGPffi/TSmtFvPJZAJAVYko56yqIQQREZFArKpiyiAR
@@ -341,8 +336,32 @@ hFqQOQsGIIYjUQbCmDHUEBg8gJGI7o+npw+mD95/+/b2kK2al/boDLE6BhH7skzPvn3x6MnjXKXy
 M3JXRM7XM1cD2fpKF6K7qjJB0nPAsU4MeZYgZCmVcYwAAkJhMEZGCUQBBlMjCI0w3Aku1kcPC4VJ
 JEkgTTWLjLvsj4EAxxhXrJ4gO7gBMEqVHdfj12AlAjhGGHEOLmFAuIU5EAEiH8/nN548euv11588
 uitl2jM+FBBXUtR+GURyggJhh8PhfDyVqQrt0maihGB5omkj4v8AVIMD/5c84wwAAAAASUVORK5C
-YII="
-            ),
+YII=";
+        // Decodifica
+        $binaryData = base64_decode($photoBlob, true);
+        if ($binaryData === false) {
+            throw new Exception("Base64 inválido.");
+        }
+
+        // Verifica se é uma imagem válida
+        $finfo = finfo_open();
+        $mimeType = finfo_buffer($finfo, $binaryData, FILEINFO_MIME_TYPE);
+        finfo_close($finfo);
+
+        if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
+            throw new Exception("Conteúdo não é uma imagem válida.");
+        }
+
+        return $binaryData;
+    }
+
+    protected function getUserData(): array
+    {
+        return [
+            'id' => 'testuidt-estu-idte-stui-dtestuidtest',
+            'nome' => 'Fábio',
+            'sobrenome' => 'Santos',
+            'photo_blob' => $this->getPhotoBase64ToBlob(),
             'email' => 'fabioedusantos@gmail.com',
             'senha' => password_hash("Senha@123!", PASSWORD_BCRYPT),
             'firebase_uid' => "uid-firebase-test",

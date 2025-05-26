@@ -3,7 +3,7 @@
 use App\Controllers\AuthController;
 use App\Controllers\NotificationController;
 use App\Controllers\UserController;
-use App\Helpers\Util;
+use App\Helpers\EnvHelper;
 use App\Middlewares\JwtMiddleware;
 use App\Middlewares\UserActiveMiddleware;
 use App\Repositories\UserRepository;
@@ -17,11 +17,11 @@ use function DI\autowire;
 
 return [
     PDO::class => function () {
-        $host = Util::getenv('MYSQL_HOST') ?: '';
-        $port = Util::getenv('MYSQL_PORT') ?: '';
-        $dbname = Util::getenv('MYSQL_DATABASE') ?: '';
-        $username = Util::getenv('MYSQL_USER') ?: '';
-        $password = Util::getenv('MYSQL_PASSWORD') ?: '';
+        $host = EnvHelper::getenv('MYSQL_HOST') ?: '';
+        $port = EnvHelper::getenv('MYSQL_PORT') ?: '';
+        $dbname = EnvHelper::getenv('MYSQL_DATABASE') ?: '';
+        $username = EnvHelper::getenv('MYSQL_USER') ?: '';
+        $password = EnvHelper::getenv('MYSQL_PASSWORD') ?: '';
 
         // Criando a conexão PDO
         $pdo = new PDO("mysql:host=$host:$port;dbname=$dbname", $username, $password);

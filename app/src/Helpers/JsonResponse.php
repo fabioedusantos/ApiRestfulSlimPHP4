@@ -7,7 +7,7 @@ use Slim\Psr7\Response;
 /**
  * JsonResponse
  *
- * Util para padronizar respostas JSON em APIs Slim.
+ * UtilHelper para padronizar respostas JSON em APIs Slim.
  *
  * Essa classe oferece métodos estáticos para retornar respostas padronizadas
  * com status HTTP e corpo estruturado, seguindo o formato:

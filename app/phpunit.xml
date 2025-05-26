@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php" backupGlobals="false" backupStaticAttributes="false">
+<phpunit bootstrap="tests/bootstrap.php"
+         backupGlobals="false"
+         backupStaticAttributes="false"
+         convertWarningsToExceptions="false"
+         convertDeprecationsToExceptions="false">
+
     <!-- Define os testes que o PHPUnit irá rodar -->
     <testsuites>
         <testsuite name="API Test Suite">

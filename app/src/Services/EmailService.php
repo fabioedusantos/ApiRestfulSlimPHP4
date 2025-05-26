@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\BadRequestException;
-use App\Helpers\Util;
+use App\Helpers\EnvHelper;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use Twig\Environment;
@@ -19,10 +19,10 @@ class EmailService
         private Environment $twig = new Environment(new FilesystemLoader(self::DIR_EMAIL_TEMPLATES))
     ) {
         $this->phpMailer->isSMTP();
-        $this->phpMailer->Host = Util::getEnv("SMTP_HOST");           // Servidor SMTP da Microsoft 365
+        $this->phpMailer->Host = EnvHelper::getEnv("SMTP_HOST");           // Servidor SMTP da Microsoft 365
         $this->phpMailer->SMTPAuth = true;                                  // Autenticação habilitada
-        $this->phpMailer->Username = Util::getEnv("SMTP_USERNAME");   // Seu e-mail do Microsoft 365
-        $this->phpMailer->Password = Util::getEnv("SMTP_PASSWORD");   // Sua senha de e-mail de app
+        $this->phpMailer->Username = EnvHelper::getEnv("SMTP_USERNAME");   // Seu e-mail do Microsoft 365
+        $this->phpMailer->Password = EnvHelper::getEnv("SMTP_PASSWORD");   // Sua senha de e-mail de app
         $this->phpMailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;     // TLS para criptografia
         $this->phpMailer->Port = 587;                                      // Porta TCP para TLS
         //Enable SMTP debugging
@@ -34,10 +34,10 @@ class EmailService
         $this->phpMailer->isHTML();
         $this->phpMailer->CharSet = 'UTF-8';
 
-        $fromEmail = Util::getEnv("SMTP_FROM_EMAIL");
-        $fromName = Util::getEnv("SMTP_FROM_NAME");
+        $fromEmail = EnvHelper::getEnv("SMTP_FROM_EMAIL");
+        $fromName = EnvHelper::getEnv("SMTP_FROM_NAME");
         if (empty($fromEmail)) {
-            $fromEmail = Util::getEnv("SMTP_USERNAME");
+            $fromEmail = EnvHelper::getEnv("SMTP_USERNAME");
         }
         if (empty($fromName)) {
             $fromName = "";
@@ -48,9 +48,9 @@ class EmailService
         );
 
         //email de resposta ao remetente
-        $replyEmail = Util::getEnv("SMTP_REPLY_EMAIL");
+        $replyEmail = EnvHelper::getEnv("SMTP_REPLY_EMAIL");
         if (!empty($replyEmail)) {
-            $replyName = Util::getEnv("SMTP_REPLY_NAME");
+            $replyName = EnvHelper::getEnv("SMTP_REPLY_NAME");
             if (empty($replyName)) {
                 $replyName = "";
             }

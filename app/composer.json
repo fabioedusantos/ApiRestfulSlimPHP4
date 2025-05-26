@@ -12,7 +12,9 @@
     "predis/predis": "^3.2",
     "phpmailer/phpmailer": "^6.12",
     "twig/twig": "^3.21",
-    "kreait/firebase-php": "^7.23"
+    "kreait/firebase-php": "^7.23",
+    "ext-fileinfo": "*",
+    "ext-curl": "*"
   },
   "autoload": {
     "psr-4": {

@@ -8,7 +8,9 @@ use App\Exceptions\UnauthorizedException;
 use App\Helpers\FirebaseAuthHelper;
 use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\JwtHelper;
-use App\Helpers\Util;
+use App\Helpers\NumberHelper;
+use App\Helpers\PhotoHelper;
+use App\Helpers\EnvHelper;
 use App\Repositories\UserRepository;
 use DateTime;
 use Firebase\JWT\JWT;
@@ -26,8 +28,8 @@ class AuthService
         private UserRepository $userRepository,
         private Client $redisClient
     ) {
-        $this->jwtSecret = Util::getEnv('JWT_SECRET') ?? '';
-        $this->jwtRefreshSecret = Util::getEnv('JWT_REFRESH_SECRET') ?? '';
+        $this->jwtSecret = EnvHelper::getEnv('JWT_SECRET') ?? '';
+        $this->jwtRefreshSecret = EnvHelper::getEnv('JWT_REFRESH_SECRET') ?? '';
     }
 
     public function signup(
@@ -161,6 +163,7 @@ class AuthService
         $codigoConfirmacao = $this->generateRandomConfirmationCode();
         $validadeCodigoConfirmacao = $this->generateExpirationTime();
         $codigoConfirmacaoHash = password_hash($codigoConfirmacao, PASSWORD_BCRYPT);
+
         try {
             if (!$this->userRepository->updateResetCode(
                 $user['id'],
@@ -423,7 +426,7 @@ class AuthService
         try {
             $photoBlob = null;
             if (!empty($userFirebase->photoUrl)) {
-                $photoBlob = Util::urlFotoToBlob($userFirebase->photoUrl);
+                $photoBlob = PhotoHelper::urlFotoToBlob($userFirebase->photoUrl);
             }
 
             $userId = $this->userRepository->createByGoogle(
@@ -475,7 +478,7 @@ class AuthService
 
         if (!empty($userFirebase->photoUrl)) {
             try {
-                $photoBlob = Util::urlFotoToBlob($userFirebase->photoUrl);
+                $photoBlob = PhotoHelper::urlFotoToBlob($userFirebase->photoUrl);
                 if (empty($photoBlob) || !$this->userRepository->updatePhotoBlob($user['id'], $photoBlob)) {
                     throw new \Exception();
                 }
@@ -513,7 +516,7 @@ class AuthService
     private function generateRandomConfirmationCode(): string
     {
         try {
-            return Util::generateRandomNumber($this->digitosConfirmacaoSenha);
+            return NumberHelper::generateRandomNumber($this->digitosConfirmacaoSenha);
         } catch (\Exception $e) {
             throw new InternalServerErrorException(
                 "Erro ao gerar o código de confirmação. Tente novamente.",

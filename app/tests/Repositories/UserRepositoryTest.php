@@ -2,7 +2,8 @@
 
 namespace Tests\Repositories;
 
-use App\Helpers\Util;
+use App\Helpers\PhotoHelper;
+use App\Helpers\EnvHelper;
 use App\Repositories\UserRepository;
 use DateTime;
 use Kreait\Firebase\Auth\UserRecord;
@@ -234,7 +235,7 @@ class UserRepositoryTest extends TestCase
     {
         $nome = $this->userData['nome'];
         $sobrenome = $this->userData['sobrenome'];
-        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $photoBlob = PhotoHelper::urlFotoToBlob($this->firebaseUserData->photoUrl);
         $email = $this->userData['email'];
         $firebaseUid = $this->firebaseUserData->uid;
 
@@ -266,7 +267,7 @@ class UserRepositoryTest extends TestCase
 
         $nome = $this->userData['nome'];
         $sobrenome = $this->userData['sobrenome'];
-        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $photoBlob = PhotoHelper::urlFotoToBlob($this->firebaseUserData->photoUrl);
         $email = $this->userData['email'];
         $firebaseUid = $this->firebaseUserData->uid;
 
@@ -287,7 +288,7 @@ class UserRepositoryTest extends TestCase
 
         $nome = $this->userData['nome'];
         $sobrenome = $this->userData['sobrenome'];
-        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $photoBlob = PhotoHelper::urlFotoToBlob($this->firebaseUserData->photoUrl);
         $email = $this->userData['email'] . ".br";
         $firebaseUid = $this->firebaseUserData->uid;
 
@@ -511,7 +512,7 @@ class UserRepositoryTest extends TestCase
     public function testUpdatePhotoBlobSucesso(): string
     {
         $userId = $this->testCreateSucesso();
-        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $photoBlob = PhotoHelper::urlFotoToBlob($this->firebaseUserData->photoUrl);
 
         $userFromDb = $this->userRepository->getByUserId($userId);
         $this->assertEmpty($userFromDb['photo_blob']);
@@ -536,7 +537,7 @@ class UserRepositoryTest extends TestCase
         $nome = "José";
         $sobrenome = "Nildo";
         $hashSenha = password_hash("JoseNildo@123!@#$", PASSWORD_BCRYPT);
-        $photoBlob = Util::urlFotoToBlob($this->firebaseUserData->photoUrl);
+        $photoBlob = PhotoHelper::urlFotoToBlob($this->firebaseUserData->photoUrl);
 
         $userFromDb = $this->userRepository->getByUserId($userId);
         $this->assertEmpty($userFromDb['photo_blob']);

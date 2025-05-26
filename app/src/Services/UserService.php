@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
-use App\Helpers\Util;
+use App\Helpers\EnvHelper;
 use App\Repositories\UserRepository;
 
 class UserService
@@ -82,7 +82,7 @@ class UserService
             if (!base64_decode($photoBase64, true)) {
                 throw new BadRequestException("Imagem no formato inválido.");
             }
-            $photoBlob = Util::photoBase64ToBlob($photoBase64);
+            $photoBlob = EnvHelper::photoBase64ToBlob($photoBase64);
         }
 
         if (!empty($nome) || !empty($sobrenome) || !empty($senha) || !empty($photoBase64) || $isRemovePhoto) {

@@ -3,17 +3,20 @@
 namespace Tests\Services;
 
 use App\Helpers\GoogleRecaptchaHelper;
+use App\Helpers\NumberHelper;
 use App\Helpers\Valid;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use DateTime;
 use Kreait\Firebase\Auth\UserRecord;
 use Mockery;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
 use Tests\Fixtures\MockClientRedis;
 use Tests\Fixtures\UserFixture;
 
+#[RunTestsInSeparateProcesses] //aplicando para rodar cada teste em um processo separado, necessário para o Mockery overload funcionar corretamente
 class AuthServiceTest extends TestCase
 {
 
@@ -28,6 +31,7 @@ class AuthServiceTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->expirationInHours = 2;
         $this->userData = $this->getUserData();
         $this->firebaseUserData = $this->getFirebaseUserData();
@@ -40,9 +44,9 @@ class AuthServiceTest extends TestCase
 
     protected function tearDown(): void
     {
+        parent::tearDown();
         $this->userData['is_active'] = 1;
         Mockery::close();
-        parent::tearDown();
     }
 
 
@@ -307,6 +311,35 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testSignupFalhaGerarCodigoConfirmacao(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+
+        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
+        $generateRandomNumber->shouldReceive('generateRandomNumber')
+            ->withAnyArgs()
+            ->once()
+            ->andThrow(new \Exception("Erro ao gerar número aleatório."));
+
+        $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
+
+        $this->authService->signup(
+            "Fábio",
+            "Santos",
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
+
     public function testSignupFalhaCriarUsuarioException(): void
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
@@ -557,6 +590,39 @@ class AuthServiceTest extends TestCase
                 'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
             ]
         );
+
+        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
+        $generateRandomNumber->shouldReceive('generateRandomNumber')
+            ->withAnyArgs()
+            ->once()
+            ->andThrow(new \Exception("Erro ao gerar número aleatório."));
+
+        $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
+
+        $this->authService->resendConfirmEmail(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testResendConfirmEmailFalhaSalvarCodigoConfirmacao(): void
+    {
+        $this->userData['firebase_uid'] = null;
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
+            $this->userData +
+            [
+                'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+            ]
+        );
         $this->userRepository->method('updateResetCode')->willReturn(false);
 
         $this->expectExceptionMessage("Não foi possível salvar o código de confirmação. Tente novamente.");
@@ -568,7 +634,7 @@ class AuthServiceTest extends TestCase
         );
     }
 
-    public function testResendConfirmEmailFalhaGerarCodigoConfirmacaoException(): void
+    public function testResendConfirmEmailFalhaSalvarCodigoConfirmacaoException(): void
     {
         $this->userData['firebase_uid'] = null;
         $tempo = $this->expirationInHours * 60 * 60 - 1;
@@ -798,9 +864,16 @@ class AuthServiceTest extends TestCase
             ->once()
             ->andReturn(true);
 
+        $this->userData['firebase_uid'] = null;
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
 
-        $this->expectExceptionMessage("Não é possível redefinir senha de conta Firebase/Google.");
+        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
+        $generateRandomNumber->shouldReceive('generateRandomNumber')
+            ->withAnyArgs()
+            ->once()
+            ->andThrow(new \Exception("Erro ao gerar número aleatório."));
+
+        $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
 
         $this->authService->forgotPassword(
             "fabioedusantos@gmail.com",
@@ -809,7 +882,27 @@ class AuthServiceTest extends TestCase
         );
     }
 
-    public function testForgotPasswordFalhaGerarCodigoConfirmacaoException(): void
+    public function testForgotPasswordFalhaSalvarCodigoConfirmacao(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userData['firebase_uid'] = null;
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+        $this->userRepository->method('updateResetCode')->willReturn(false);
+
+        $this->expectExceptionMessage("Não foi possível salvar o código de confirmação. Tente novamente.");
+
+        $this->authService->forgotPassword(
+            "fabioedusantos@gmail.com",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testForgotPasswordFalhaSalvarCodigoConfirmacaoException(): void
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')

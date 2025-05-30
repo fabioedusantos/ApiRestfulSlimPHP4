@@ -803,6 +803,34 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testCheckResetPasswordFalhaCodigoIncorreto(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+        $this->userRepository
+            ->method('getByEmailWithPasswordReset')
+            ->willReturn(
+                $this->userData +
+                [
+                    'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                    'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+                ]
+            );
+
+        $this->authService->checkResetPassword(
+            "fabioedusantos@gmail.com",
+            "654321",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
 
     // forgotPassword()
     public function testForgotPasswordSucesso(): void

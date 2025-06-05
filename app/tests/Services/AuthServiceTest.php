@@ -919,6 +919,23 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testConfirmEmailFalhaEmail(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Email deve ser válido.");
+
+        $this->authService->confirmEmail(
+            "fabão@doemaião",
+            "123456",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
 
     // forgotPassword()
     public function testForgotPasswordSucesso(): void

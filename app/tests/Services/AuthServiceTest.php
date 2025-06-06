@@ -936,6 +936,23 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testConfirmEmailFalhaCodigoQtdDigitos(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+
+        $this->authService->confirmEmail(
+            "fabioedusantos@gmail.com",
+            "12345",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
 
     // forgotPassword()
     public function testForgotPasswordSucesso(): void

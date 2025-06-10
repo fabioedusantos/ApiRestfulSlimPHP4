@@ -970,6 +970,26 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testConfirmEmailFalhaUsuarioInexistente(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+
+        $this->userRepository->method('getByEmailWithPasswordReset')
+            ->willReturn(null);
+
+        $this->authService->confirmEmail(
+            "fabioedusantos@gmail.com",
+            "123456",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
 
     // forgotPassword()
     public function testForgotPasswordSucesso(): void

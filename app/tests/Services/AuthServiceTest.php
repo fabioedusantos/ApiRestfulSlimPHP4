@@ -1047,6 +1047,36 @@ class AuthServiceTest extends TestCase
         );
     }
 
+    public function testConfirmEmailFalhaAtivar(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Não foi possível ativar o usuário. Tente novamente.");
+
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+        $this->userRepository->method('getByEmailWithPasswordReset')
+            ->willReturn(
+                $this->userData +
+                [
+                    'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                    'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+                ]
+            );
+
+        $this->userRepository->method('activate')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->authService->confirmEmail(
+            "fabioedusantos@gmail.com",
+            "123456",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
 
     // forgotPassword()
     public function testForgotPasswordSucesso(): void

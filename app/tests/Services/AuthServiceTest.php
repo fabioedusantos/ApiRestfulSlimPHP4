@@ -1328,4 +1328,56 @@ class AuthServiceTest extends TestCase
         $this->assertArrayHasKey('expirationInHours', $info);
         $this->assertEquals($this->expirationInHours, $info['expirationInHours']);
     }
+
+
+    // resetPassword()
+    public function testResetPasswordSucesso(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $codigoConfirmacao = "123456";
+        $senha = "Senha@123!";;
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmailWithPasswordReset')
+            ->with(
+                $this->equalTo($email)
+            )
+            ->willReturn(
+                $this->userData +
+                [
+                    'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                    'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+                ]
+            );
+
+        $this->userRepository->expects($this->once())
+            ->method('updatePassword')
+            ->with(
+                $this->equalTo($this->userData['id']),
+                $this->callback(function ($hashedPassword) use ($senha) {
+                    return password_verify($senha, $hashedPassword);
+                })
+            );
+
+        $this->authService->resetPassword(
+            $email,
+            $codigoConfirmacao,
+            $senha,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+    }
 }

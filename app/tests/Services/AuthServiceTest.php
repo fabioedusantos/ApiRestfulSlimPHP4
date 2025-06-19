@@ -1416,4 +1416,24 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResetPasswordFalhaSenha(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage(
+            "A senha deve ter no mínimo 8 caracteres, com pelo menos uma letra maiúscula, um número e um caractere especial."
+        );
+
+        $this->authService->resetPassword(
+            "fabioedusantos@gmail.com",
+            "123456",
+            "PipoquinhaAçucarada",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

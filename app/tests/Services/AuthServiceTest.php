@@ -1436,4 +1436,25 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResetPasswordFalhaUsuarioInexistente(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
+
+        $this->userRepository->method('getByEmailWithPasswordReset')
+            ->willReturn(null);
+
+        $this->authService->resetPassword(
+            "fabioedusantos@gmail.com",
+            "123456",
+            "Senha@123!",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

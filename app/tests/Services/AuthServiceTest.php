@@ -1512,4 +1512,36 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testResetPasswordFalhaSalvarException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Não foi possível atualizar a senha. Tente novamente.");
+
+        $tempo = $this->expirationInHours * 60 * 60 - 1;
+        $this->userRepository->method('getByEmailWithPasswordReset')
+            ->willReturn(
+                $this->userData +
+                [
+                    'reset_code' => password_hash("123456", PASSWORD_BCRYPT),
+                    'reset_code_expiry' => (new DateTime("+{$tempo} second"))->format('Y-m-d H:i:s')
+                ]
+            );
+
+        $this->userRepository->method('updatePassword')->willThrowException(
+            new \PDOException("Erro no banco de dados XPTO")
+        );
+
+        $this->authService->resetPassword(
+            "fabioedusantos@gmail.com",
+            "123456",
+            "Senha@123!",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

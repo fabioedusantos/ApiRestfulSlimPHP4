@@ -1544,4 +1544,54 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+
+    //login()
+    public function testLoginSucesso(): array
+    {
+        $email = "fabioedusantos@gmail.com";
+        $senha = "Senha@123!";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($this->equalTo($email))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateUltimoAcesso')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn(true);
+
+        $token = $this->authService->login(
+            $email,
+            $senha,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        // Assert básico: retornou array
+        $this->assertIsArray($token);
+
+        $this->assertArrayHasKey('token', $token);
+        $this->assertArrayHasKey('refreshToken', $token);
+
+        $this->assertIsString($token['token']);
+        $this->assertNotEmpty($token['token']);
+
+        $this->assertIsString($token['refreshToken']);
+        $this->assertNotEmpty($token['refreshToken']);
+
+        return $token;
+    }
 }

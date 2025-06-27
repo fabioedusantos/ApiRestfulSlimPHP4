@@ -1594,4 +1594,22 @@ class AuthServiceTest extends TestCase
 
         return $token;
     }
+
+    public function testLoginFalhaRecaptcha(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(false);
+
+        $this->expectExceptionMessage('Não foi possível validar sua ação. Tente novamente.');
+
+        // Simula que recaptcha falha
+        $this->authService->login(
+            "user@example.com",
+            "123456",
+            "",
+            ""
+        );
+    }
 }

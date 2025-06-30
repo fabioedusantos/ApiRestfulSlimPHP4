@@ -1612,4 +1612,21 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testLoginFalhaUsuarioNaoEncontrado(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage('Usuário ou senha inválido.');
+
+        $this->authService->login(
+            "naoexiste@example.com",
+            "123456",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

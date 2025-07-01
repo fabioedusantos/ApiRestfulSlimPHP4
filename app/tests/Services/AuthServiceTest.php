@@ -1629,4 +1629,26 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testLoginFalhaUsuarioInativo(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userData['is_active'] = 0;
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+
+        $this->expectExceptionMessage(
+            'Necessário confirmar seu email. Use a opção de \"Esqueci a senha\" para recuperar a conta.'
+        );
+
+        $this->authService->login(
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            "fake-token",
+            "fake-token",
+        );
+    }
 }

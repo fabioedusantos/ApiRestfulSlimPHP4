@@ -1673,4 +1673,26 @@ class AuthServiceTest extends TestCase
             "fake-token",
         );
     }
+
+    public function testLoginFalhaAtualizarUltimoAcessoException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+
+        $this->userRepository->method('updateUltimoAcesso')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->expectExceptionMessage("Erro ao atualizar último acesso. Tente novamente.");
+
+        $this->authService->login(
+            "fabioedusantos@gmail.com",
+            "Senha@123!",
+            "fake-token",
+            "fake-token",
+        );
+    }
 }

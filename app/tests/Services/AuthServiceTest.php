@@ -3,6 +3,7 @@
 namespace Tests\Services;
 
 use App\Helpers\GoogleRecaptchaHelper;
+use App\Helpers\JwtHelper;
 use App\Helpers\NumberHelper;
 use App\Helpers\Valid;
 use App\Repositories\UserRepository;
@@ -319,10 +320,8 @@ class AuthServiceTest extends TestCase
 
         $this->userRepository->method('getByEmail')->willReturn(null);
 
-        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
-        $generateRandomNumber->shouldReceive('generateRandomNumber')
-            ->withAnyArgs()
-            ->once()
+        $numberHelper = Mockery::mock('overload:' . NumberHelper::class);
+        $numberHelper->shouldReceive('generateRandomNumber')
             ->andThrow(new \Exception("Erro ao gerar número aleatório."));
 
         $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
@@ -590,10 +589,8 @@ class AuthServiceTest extends TestCase
             ]
         );
 
-        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
-        $generateRandomNumber->shouldReceive('generateRandomNumber')
-            ->withAnyArgs()
-            ->once()
+        $numberHelper = Mockery::mock('overload:' . NumberHelper::class);
+        $numberHelper->shouldReceive('generateRandomNumber')
             ->andThrow(new \Exception("Erro ao gerar número aleatório."));
 
         $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
@@ -1231,10 +1228,8 @@ class AuthServiceTest extends TestCase
         $this->userData['firebase_uid'] = null;
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
 
-        $generateRandomNumber = Mockery::mock('overload:' . NumberHelper::class);
-        $generateRandomNumber->shouldReceive('generateRandomNumber')
-            ->withAnyArgs()
-            ->once()
+        $numberHelper = Mockery::mock('overload:' . NumberHelper::class);
+        $numberHelper->shouldReceive('generateRandomNumber')
             ->andThrow(new \Exception("Erro ao gerar número aleatório."));
 
         $this->expectExceptionMessage("Erro ao gerar o código de confirmação. Tente novamente.");
@@ -1693,6 +1688,88 @@ class AuthServiceTest extends TestCase
             "Senha@123!",
             "fake-token",
             "fake-token",
+        );
+    }
+
+    public function testLoginFalhaGerarToken(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $senha = "Senha@123!";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($this->equalTo($email))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateUltimoAcesso')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn(true);
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->login(
+            $email,
+            $senha,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+    }
+
+    public function testLoginFalhaGerarRefreshToken(): void
+    {
+        $email = "fabioedusantos@gmail.com";
+        $senha = "Senha@123!";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($this->equalTo($email))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateUltimoAcesso')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn(true);
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andReturn("fake-jwt-token");
+        $jwtHelper->shouldReceive('generateRefreshToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->login(
+            $email,
+            $senha,
+            $recaptchaToken,
+            $recaptchaSiteKey
         );
     }
 }

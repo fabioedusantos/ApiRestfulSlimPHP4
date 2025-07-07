@@ -1772,4 +1772,35 @@ class AuthServiceTest extends TestCase
             $recaptchaSiteKey
         );
     }
+
+
+    // refreshToken()
+    public function testRefreshTokenSucesso(): void
+    {
+        $this->userRepository->expects($this->once())
+            ->method('isActive')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn(true);
+
+        $token = $this->testLoginSucesso();
+        if (empty($token['refreshToken'])) {
+            $this->fail("O refreshToken não foi gerado.");
+        }
+
+        $token = $this->authService->refreshToken(
+            $token['refreshToken']
+        );
+
+        // Assert básico: retornou array
+        $this->assertIsArray($token);
+
+        $this->assertArrayHasKey('token', $token);
+        $this->assertArrayHasKey('refreshToken', $token);
+
+        $this->assertIsString($token['token']);
+        $this->assertNotEmpty($token['token']);
+
+        $this->assertIsString($token['refreshToken']);
+        $this->assertNotEmpty($token['refreshToken']);
+    }
 }

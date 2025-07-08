@@ -1803,4 +1803,13 @@ class AuthServiceTest extends TestCase
         $this->assertIsString($token['refreshToken']);
         $this->assertNotEmpty($token['refreshToken']);
     }
+
+    public function testRefreshTokenTokenNaoFornecido(): void
+    {
+        $this->expectExceptionMessage('Refresh token não fornecido.');
+
+        $this->authService->refreshToken(
+            ""
+        );
+    }
 }

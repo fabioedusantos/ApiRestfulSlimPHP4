@@ -1812,4 +1812,20 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testRefreshTokenUsuarioNaoAutorizado(): void
+    {
+        $this->userRepository->method('isActive')->willReturn(false);
+
+        $token = $this->testLoginSucesso();
+        if (empty($token['refreshToken'])) {
+            $this->fail("O refreshToken não foi gerado.");
+        }
+
+        $this->expectExceptionMessage('Usuário não autorizado.');
+
+        $this->authService->refreshToken(
+            $token['refreshToken']
+        );
+    }
 }

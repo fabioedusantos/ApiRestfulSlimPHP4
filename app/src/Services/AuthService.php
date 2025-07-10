@@ -349,8 +349,12 @@ class AuthService
             throw new UnauthorizedException("Refresh token não fornecido.");
         }
 
-        $decoded = JWT::decode($refreshToken, new Key($this->jwtRefreshSecret, 'HS256'));
-        $userId = $decoded?->sub?->id ?? null;
+        try{
+            $decoded = JWT::decode($refreshToken, new Key($this->jwtRefreshSecret, 'HS256'));
+            $userId = $decoded?->sub?->id ?? null;
+        } catch (\Exception $e) {
+            throw new UnauthorizedException("Refresh token inválido ou expirado.", 0, $e);
+        }
 
         //verificar se usuário está ativo e funcional
         if (empty($userId) || !$this->userRepository->isActive($userId)) {

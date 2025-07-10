@@ -9,11 +9,13 @@ use App\Helpers\Valid;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use DateTime;
+use Firebase\JWT\JWT;
 use Kreait\Firebase\Auth\UserRecord;
 use Mockery;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Predis\Client;
+use stdClass;
 use Tests\Fixtures\MockClientRedis;
 use Tests\Fixtures\UserFixture;
 
@@ -1804,7 +1806,7 @@ class AuthServiceTest extends TestCase
         $this->assertNotEmpty($token['refreshToken']);
     }
 
-    public function testRefreshTokenTokenNaoFornecido(): void
+    public function testRefreshTokenFalhaTokenNaoFornecido(): void
     {
         $this->expectExceptionMessage('Refresh token não fornecido.');
 
@@ -1813,7 +1815,7 @@ class AuthServiceTest extends TestCase
         );
     }
 
-    public function testRefreshTokenUsuarioNaoAutorizado(): void
+    public function testRefreshTokenFalhaUsuarioNaoAutorizado(): void
     {
         $this->userRepository->method('isActive')->willReturn(false);
 
@@ -1827,5 +1829,62 @@ class AuthServiceTest extends TestCase
         $this->authService->refreshToken(
             $token['refreshToken']
         );
+    }
+
+    public function testRefreshTokenFalhaGerarToken(): void
+    {
+        $this->userRepository
+            ->method('isActive')
+            ->willReturn(true);
+
+        $jwt = Mockery::mock('overload:' . JWT::class);
+        $decoded = new stdClass();
+        $decoded->sub = new stdClass();
+        $decoded->sub->id = $this->userData['id'];
+        $jwt->shouldReceive('decode')
+            ->andReturn($decoded);
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->refreshToken("fake-jwt-refresh-token");
+    }
+
+    public function testRefreshTokenFalhaTokenInvalido(): void
+    {
+        $this->userRepository
+            ->method('isActive')
+            ->willReturn(true);
+
+        $this->expectExceptionMessage("Refresh token inválido ou expirado.");
+
+        $this->authService->refreshToken("fake-jwt-refresh-token-invalido");
+    }
+
+    public function testRefreshTokenFalhaGerarRefreshToken(): void
+    {
+        $this->userRepository
+            ->method('isActive')
+            ->willReturn(true);
+
+        $jwt = Mockery::mock('overload:' . JWT::class);
+        $decoded = new stdClass();
+        $decoded->sub = new stdClass();
+        $decoded->sub->id = $this->userData['id'];
+        $jwt->shouldReceive('decode')
+            ->andReturn($decoded);
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andReturn("fake-jwt-token");
+        $jwtHelper->shouldReceive('generateRefreshToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->refreshToken("fake-jwt-refresh-token");
     }
 }

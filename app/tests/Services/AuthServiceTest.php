@@ -1887,4 +1887,22 @@ class AuthServiceTest extends TestCase
 
         $this->authService->refreshToken("fake-jwt-refresh-token");
     }
+
+
+    // isLoggedIn()
+    public function testIsLoggedInSucesso(): void
+    {
+        $userId = $this->userData['id'];
+
+        $this->userRepository->expects($this->once())
+            ->method('updateUltimoAcesso')
+            ->with(
+                $this->equalTo($userId)
+            )
+            ->willReturn(true);
+
+        $this->authService->isLoggedIn(
+            $userId
+        );
+    }
 }

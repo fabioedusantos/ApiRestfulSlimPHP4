@@ -1905,4 +1905,17 @@ class AuthServiceTest extends TestCase
             $userId
         );
     }
+
+    public function testIsLoggedInFalhaAlterarUltimoAcesso(): void
+    {
+        $userId = $this->userData['id'];
+
+        $this->expectExceptionMessage("Erro ao atualizar último acesso. Tente novamente.");
+
+        $this->userRepository->method('updateUltimoAcesso')->willReturn(false);
+
+        $this->authService->isLoggedIn(
+            $userId
+        );
+    }
 }

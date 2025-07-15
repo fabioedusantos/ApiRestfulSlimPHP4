@@ -1918,4 +1918,18 @@ class AuthServiceTest extends TestCase
             $userId
         );
     }
+
+    public function testIsLoggedInFalhaAlterarUltimoAcessoException(): void
+    {
+        $userId = $this->userData['id'];
+
+        $this->expectExceptionMessage("Erro ao atualizar último acesso. Tente novamente.");
+
+        $this->userRepository->method('updateUltimoAcesso')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->authService->isLoggedIn(
+            $userId
+        );
+    }
 }

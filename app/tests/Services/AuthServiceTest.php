@@ -2,6 +2,7 @@
 
 namespace Tests\Services;
 
+use App\Helpers\FirebaseAuthHelper;
 use App\Helpers\GoogleRecaptchaHelper;
 use App\Helpers\JwtHelper;
 use App\Helpers\NumberHelper;
@@ -1931,5 +1932,75 @@ class AuthServiceTest extends TestCase
         $this->authService->isLoggedIn(
             $userId
         );
+    }
+
+
+    // signupGoogle()
+    public function testSignupGoogleSucesso(): void
+    {
+        $firebaseToken = "FaKeFirebaseTokenFaKeFirebas";
+        $nome = "Fábio";
+        $sobrenome = "Santos";
+        $isTerms = true;
+        $isPolicy = true;
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByEmail')
+            ->with($this->equalTo($this->userData['email']))
+            ->willReturn(null);
+
+        $this->userRepository->expects($this->once())
+            ->method('createByGoogle')
+            ->with(
+                $this->equalTo($nome),
+                $this->equalTo($sobrenome),
+                $this->callback(function ($photoBlob) {
+                    return Valid::isNullOrString($photoBlob);
+                }),
+                $this->callback(function ($email) {
+                    return Valid::isStringWithContent($email);
+                }),
+                $this->callback(function ($firebaseUid) {
+                    return Valid::isStringWithContent($firebaseUid);
+                })
+            )
+            ->willReturn($this->userData['id']);
+
+        $token = $this->authService->signupGoogle(
+            $firebaseToken,
+            $nome,
+            $sobrenome,
+            $isTerms,
+            $isPolicy,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        $this->assertIsArray($token);
+
+        $this->assertArrayHasKey('token', $token);
+        $this->assertArrayHasKey('refreshToken', $token);
+
+        $this->assertIsString($token['token']);
+        $this->assertNotEmpty($token['token']);
+
+        $this->assertIsString($token['refreshToken']);
+        $this->assertNotEmpty($token['refreshToken']);
     }
 }

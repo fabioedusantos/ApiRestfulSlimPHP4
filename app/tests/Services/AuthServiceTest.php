@@ -2003,4 +2003,24 @@ class AuthServiceTest extends TestCase
         $this->assertIsString($token['refreshToken']);
         $this->assertNotEmpty($token['refreshToken']);
     }
+
+    public function testSignupGoogleFalhaRecaptcha(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(false);
+
+        $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
+
+        $this->authService->signupGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "Fábio",
+            "Santos",
+            true,
+            true,
+            "",
+            ""
+        );
+    }
 }

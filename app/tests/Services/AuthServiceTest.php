@@ -2023,4 +2023,24 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testSignupGoogleFalhaTokenFirebase(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage("Token Firebase não fornecido.");
+
+        $this->authService->signupGoogle(
+            "",
+            "Fábio",
+            "Santos",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

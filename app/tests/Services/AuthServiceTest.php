@@ -2043,4 +2043,29 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupGoogleFalhaTokenFirebaseInvalido(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn(null);
+
+        $this->expectExceptionMessage("Token Firebase inválido ou expirado.");
+
+        $this->authService->signupGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "Fábio",
+            "Santos",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

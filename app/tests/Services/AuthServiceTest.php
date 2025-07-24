@@ -2118,4 +2118,31 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupGoogleFalhaEmail(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->method('getByEmail')->willReturn($this->userData);
+
+        $this->expectExceptionMessage("Email já cadastrado.");
+
+        $this->authService->signupGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "Fábio",
+            "Santos",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

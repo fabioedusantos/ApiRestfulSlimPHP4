@@ -2172,4 +2172,31 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupGoogleFalhaPolitica(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+
+        $this->expectExceptionMessage("Aceite a política de privacidade para se cadastrar.");
+
+        $this->authService->signupGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "Fábio",
+            "Santos",
+            true,
+            false,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

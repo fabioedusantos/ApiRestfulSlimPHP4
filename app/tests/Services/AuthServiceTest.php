@@ -2227,4 +2227,33 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testSignupGoogleFalhaCriarUsuarioException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->method('getByEmail')->willReturn(null);
+        $this->userRepository->method('createByGoogle')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->expectExceptionMessage("Erro ao criar usuário. Tente novamente.");
+
+        $this->authService->signupGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "Fábio",
+            "Santos",
+            true,
+            true,
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

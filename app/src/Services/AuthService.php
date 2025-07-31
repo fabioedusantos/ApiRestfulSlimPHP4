@@ -395,11 +395,11 @@ class AuthService
         try {
             $userFirebase = FirebaseAuthHelper::verificarIdToken($firebaseToken);
             if (empty($userFirebase)) {
-                throw new UnauthorizedException("Token Firebase inválido ou expirado.");
+                throw new \Exception();
             }
         } catch (\Exception $e) {
-            throw new InternalServerErrorException(
-                "Não foi possível verificar o token Firebase. Tente novamente.",
+            throw new UnauthorizedException(
+                "Token Firebase inválido ou expirado.",
                 0,
                 $e
             );
@@ -427,6 +427,7 @@ class AuthService
             throw new BadRequestException("Aceite a política de privacidade para se cadastrar.");
         }
 
+        $userId = null;
         try {
             $photoBlob = null;
             if (!empty($userFirebase->photoUrl)) {
@@ -444,11 +445,11 @@ class AuthService
             if (empty($userId)) {
                 throw new \Exception();
             }
-
-            return $this->generateToken($userId);
         } catch (\Exception $e) {
             throw new InternalServerErrorException("Erro ao criar usuário. Tente novamente.", 0, $e);
         }
+
+        return $this->generateToken($userId);
     }
 
     public function loginGoogle(

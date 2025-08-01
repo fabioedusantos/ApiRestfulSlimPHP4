@@ -2370,4 +2370,70 @@ class AuthServiceTest extends TestCase
         );
     }
 
+
+    //loginGoogle()
+    public function testLoginGoogleSucesso(): void
+    {
+        $firebaseToken = "FaKeFirebaseTokenFaKeFirebas";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->with(
+                $this->equalTo($recaptchaToken),
+                $this->equalTo($recaptchaSiteKey)
+            )
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->with(
+                $this->equalTo($firebaseToken)
+            )
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->expects($this->once())
+            ->method('getByFirebaseUid')
+            ->with(
+                $this->callback(function ($firebaseUid) {
+                    return Valid::isStringWithContent($firebaseUid);
+                })
+            )
+            ->willReturn($this->userData);
+
+
+        $this->userRepository->expects($this->once())
+            ->method('updatePhotoBlob')
+            ->with(
+                $this->callback(function ($firebaseUid) {
+                    return Valid::isStringWithContent($firebaseUid);
+                })
+            )
+            ->willReturn(true);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateUltimoAcesso')
+            ->willReturn(true);
+
+        $token = $this->authService->loginGoogle(
+            $firebaseToken,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+
+        // Assert básico: retornou array
+        $this->assertIsArray($token);
+
+        $this->assertArrayHasKey('token', $token);
+        $this->assertArrayHasKey('refreshToken', $token);
+
+        $this->assertIsString($token['token']);
+        $this->assertNotEmpty($token['token']);
+
+        $this->assertIsString($token['refreshToken']);
+        $this->assertNotEmpty($token['refreshToken']);
+    }
 }

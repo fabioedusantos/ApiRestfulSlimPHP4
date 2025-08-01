@@ -503,7 +503,6 @@ class AuthService
         return $this->generateToken($user['id']);
     }
 
-
     private function generateToken(string $userId): array
     {
         try {

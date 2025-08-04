@@ -2453,4 +2453,21 @@ class AuthServiceTest extends TestCase
             ""
         );
     }
+
+    public function testLoginGoogleFalhaTokenFirebase(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $this->expectExceptionMessage('Token não fornecido.');
+
+        // Simula que recaptcha falha
+        $this->authService->loginGoogle(
+            "",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

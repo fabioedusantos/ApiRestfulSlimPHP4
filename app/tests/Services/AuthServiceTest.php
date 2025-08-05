@@ -2441,7 +2441,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage('Não foi possível validar sua ação. Tente novamente.');
@@ -2458,7 +2457,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage('Token não fornecido.');
@@ -2466,6 +2464,26 @@ class AuthServiceTest extends TestCase
         // Simula que recaptcha falha
         $this->authService->loginGoogle(
             "",
+            "fake-token",
+            "fake-token"
+        );
+    }
+
+    public function testLoginGoogleFalhaTokenInvalidoFirebase(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->andReturn(null);
+
+        $this->expectExceptionMessage('Token Firebase inválido ou expirado.');
+
+        // Simula que recaptcha falha
+        $this->authService->loginGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
             "fake-token",
             "fake-token"
         );

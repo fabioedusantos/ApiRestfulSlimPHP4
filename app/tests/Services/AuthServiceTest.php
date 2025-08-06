@@ -2488,4 +2488,28 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testLoginGoogleFalhaContaInexistente(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+        $this->userRepository->method('getByFirebaseUid')->willReturn(null);
+
+        $this->expectExceptionMessage('Conta inexistente. Favor criar a conta primeiro.');
+
+        // Simula que recaptcha falha
+        $this->authService->loginGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "fake-token",
+            "fake-token"
+        );
+    }
 }

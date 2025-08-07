@@ -2512,4 +2512,30 @@ class AuthServiceTest extends TestCase
             "fake-token"
         );
     }
+
+    public function testLoginGoogleFalhaUsuarioInativo(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userData['is_active'] = 0;
+        $this->userRepository->method('getByFirebaseUid')->willReturn($this->userData);
+
+        $this->expectExceptionMessage(
+            'Necessário confirmar seu email. Use a opção de \"Esqueci a senha\" para recuperar a conta.'
+        );
+
+        $this->authService->loginGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "fake-token",
+            "fake-token",
+        );
+    }
 }

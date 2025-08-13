@@ -2616,4 +2616,33 @@ class AuthServiceTest extends TestCase
             "fake-token",
         );
     }
+
+    public function testLoginGoogleFalhaAtualizarUltimoAcessoException(): void
+    {
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->once()
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository->method('getByFirebaseUid')
+            ->willReturn($this->userData);
+
+        $this->userRepository->method('updatePhotoBlob')->willReturn(true);
+
+        $this->userRepository->method('updateUltimoAcesso')
+            ->willThrowException(new \PDOException("Erro no banco de dados XPTO"));
+
+        $this->expectExceptionMessage("Erro ao atualizar último acesso. Tente novamente.");
+
+        $this->authService->loginGoogle(
+            "FaKeFirebaseTokenFaKeFirebas",
+            "fake-token",
+            "fake-token",
+        );
+    }
 }

@@ -462,7 +462,7 @@ class AuthService
         }
 
         if (empty($firebaseToken)) {
-            throw new UnauthorizedException("Token não fornecido.");
+            throw new UnauthorizedException("Token Firebase não fornecido.");
         }
 
         $userFirebase = FirebaseAuthHelper::verificarIdToken($firebaseToken);

@@ -2459,7 +2459,7 @@ class AuthServiceTest extends TestCase
         $recaptchaHelper->shouldReceive('isValid')
             ->andReturn(true);
 
-        $this->expectExceptionMessage('Token não fornecido.');
+        $this->expectExceptionMessage('Token Firebase não fornecido.');
 
         // Simula que recaptcha falha
         $this->authService->loginGoogle(
@@ -2643,6 +2643,89 @@ class AuthServiceTest extends TestCase
             "FaKeFirebaseTokenFaKeFirebas",
             "fake-token",
             "fake-token",
+        );
+    }
+
+    public function testLoginGoogleFalhaGerarToken(): void
+    {
+        $firebaseToken = "FaKeFirebaseTokenFaKeFirebas";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository
+            ->method('getByFirebaseUid')
+            ->willReturn($this->userData);
+
+
+        $this->userRepository
+            ->method('updatePhotoBlob')
+            ->willReturn(true);
+
+        $this->userRepository
+            ->method('updateUltimoAcesso')
+            ->willReturn(true);
+
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->loginGoogle(
+            $firebaseToken,
+            $recaptchaToken,
+            $recaptchaSiteKey
+        );
+    }
+
+    public function testLoginGoogleFalhaGerarRefreshToken(): void
+    {
+        $firebaseToken = "FaKeFirebaseTokenFaKeFirebas";
+        $recaptchaToken = "fake-token";
+        $recaptchaSiteKey = "fake-token";
+
+        $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
+        $recaptchaHelper->shouldReceive('isValid')
+            ->andReturn(true);
+
+        $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $firebaseAuthHelper->shouldReceive('verificarIdToken')
+            ->andReturn($this->firebaseUserData);
+
+        $this->userRepository
+            ->method('getByFirebaseUid')
+            ->willReturn($this->userData);
+
+
+        $this->userRepository
+            ->method('updatePhotoBlob')
+            ->willReturn(true);
+
+        $this->userRepository
+            ->method('updateUltimoAcesso')
+            ->willReturn(true);
+
+        $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
+        $jwtHelper->shouldReceive('generateToken')
+            ->andReturn("fake-jwt-token");
+        $jwtHelper->shouldReceive('generateRefreshToken')
+            ->andThrow(new \Exception("Erro ao gerar token."));
+
+        $this->expectExceptionMessage("Erro ao gerar token. Tente novamente.");
+
+        $this->authService->loginGoogle(
+            $firebaseToken,
+            $recaptchaToken,
+            $recaptchaSiteKey
         );
     }
 }

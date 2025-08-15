@@ -27,6 +27,7 @@ class UserRepositoryTest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->userData = $this->getUserData();
         $this->firebaseUserData = $this->getFirebaseUserData();
 
@@ -41,8 +42,8 @@ class UserRepositoryTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
         parent::tearDown();
+        Mockery::close();
     }
 
     private function generateExpirationTime(): string

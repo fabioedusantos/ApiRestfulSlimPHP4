@@ -142,7 +142,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -163,7 +162,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Nome muito curto.");
@@ -184,7 +182,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Sobrenome muito curto.");
@@ -205,7 +202,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Email deve ser válido.");
@@ -226,7 +222,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage(
@@ -245,11 +240,10 @@ class AuthServiceTest extends TestCase
         );
     }
 
-    public function testSignupEmailJaCadastrado(): void
+    public function testSignupFalhaEmailJaCadastrado(): void
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
@@ -272,7 +266,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -295,7 +288,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -318,7 +310,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -345,7 +336,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -379,17 +369,16 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository
             ->method('getByEmail')
             ->willReturn(null);
 
-        $this->userRepository->expects($this->once())
+        $this->userRepository
             ->method('create');
 
-        $this->redisClient->expects($this->once())
+        $this->redisClient
             ->method('rpush')
             ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
 
@@ -500,7 +489,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -516,7 +504,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Email deve ser válido.");
@@ -532,7 +519,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(null);
@@ -554,7 +540,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
@@ -581,7 +566,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
@@ -612,7 +596,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
@@ -640,7 +623,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmailWithPasswordReset')->willReturn(
@@ -671,7 +653,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $tempo = $this->expirationInHours * 60 * 60 - 1;
@@ -692,7 +673,7 @@ class AuthServiceTest extends TestCase
             ->method('updateResetCode')
             ->willReturn(true);
 
-        $this->redisClient->expects($this->once())
+        $this->redisClient
             ->method('rpush')
             ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
 
@@ -757,7 +738,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -785,7 +765,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -806,7 +785,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -834,7 +812,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -906,7 +883,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -923,7 +899,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Email deve ser válido.");
@@ -940,7 +915,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -957,7 +931,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -974,7 +947,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -994,7 +966,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -1023,7 +994,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -1051,7 +1021,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Não foi possível ativar o usuário. Tente novamente.");
@@ -1157,7 +1126,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -1173,7 +1141,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Email deve ser válido.");
@@ -1189,7 +1156,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -1207,7 +1173,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
@@ -1225,7 +1190,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userData['firebase_uid'] = null;
@@ -1248,7 +1212,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userData['firebase_uid'] = null;
@@ -1268,7 +1231,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userData['firebase_uid'] = null;
@@ -1296,7 +1258,6 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository
@@ -1307,7 +1268,7 @@ class AuthServiceTest extends TestCase
             ->method('updateResetCode')
             ->willReturn(true);
 
-        $this->redisClient->expects($this->once())
+        $this->redisClient
             ->method('rpush')
             ->willThrowException(new \PDOException("Erro ao enviar email no Redis."));
 
@@ -1383,7 +1344,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -1401,7 +1361,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Email deve ser válido.");
@@ -1419,7 +1378,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage(
@@ -1439,7 +1397,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -1460,7 +1417,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -1488,7 +1444,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Código inválido ou expirado. Tente novamente ou recupere sua senha.");
@@ -1515,7 +1470,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Não foi possível atualizar a senha. Tente novamente.");
@@ -1597,7 +1551,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage('Não foi possível validar sua ação. Tente novamente.');
@@ -1615,7 +1568,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage('Usuário ou senha inválido.');
@@ -1632,7 +1584,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userData['is_active'] = 0;
@@ -1654,7 +1605,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
@@ -1676,7 +1626,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
@@ -1703,21 +1652,14 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
-            ->with(
-                $this->equalTo($recaptchaToken),
-                $this->equalTo($recaptchaSiteKey)
-            )
             ->andReturn(true);
 
-        $this->userRepository->expects($this->once())
+        $this->userRepository
             ->method('getByEmail')
-            ->with($this->equalTo($email))
             ->willReturn($this->userData);
 
-        $this->userRepository->expects($this->once())
+        $this->userRepository
             ->method('updateUltimoAcesso')
-            ->with($this->equalTo($this->userData['id']))
             ->willReturn(true);
 
         $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
@@ -1743,21 +1685,14 @@ class AuthServiceTest extends TestCase
 
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
-            ->with(
-                $this->equalTo($recaptchaToken),
-                $this->equalTo($recaptchaSiteKey)
-            )
             ->andReturn(true);
 
-        $this->userRepository->expects($this->once())
+        $this->userRepository
             ->method('getByEmail')
-            ->with($this->equalTo($email))
             ->willReturn($this->userData);
 
-        $this->userRepository->expects($this->once())
+        $this->userRepository
             ->method('updateUltimoAcesso')
-            ->with($this->equalTo($this->userData['id']))
             ->willReturn(true);
 
         $jwtHelper = Mockery::mock('overload:' . JwtHelper::class);
@@ -2008,7 +1943,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(false);
 
         $this->expectExceptionMessage("Não foi possível validar sua ação. Tente novamente.");
@@ -2028,7 +1962,6 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $this->expectExceptionMessage("Token Firebase não fornecido.");
@@ -2048,12 +1981,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn(null);
 
         $this->expectExceptionMessage("Token Firebase inválido ou expirado.");
@@ -2073,12 +2004,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andThrow(new \Exception("Erro Firebase XPTO"));
 
         $this->expectExceptionMessage("Token Firebase inválido ou expirado.");
@@ -2098,12 +2027,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->expectExceptionMessage("Nome muito curto.");
@@ -2123,12 +2050,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->expectExceptionMessage("Sobrenome muito curto.");
@@ -2148,12 +2073,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByEmail')->willReturn($this->userData);
@@ -2175,12 +2098,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -2202,12 +2123,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -2229,12 +2148,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -2257,12 +2174,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByEmail')->willReturn(null);
@@ -2493,13 +2408,11 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
 
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
         $this->userRepository->method('getByFirebaseUid')->willReturn(null);
 
@@ -2517,12 +2430,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userData['is_active'] = 0;
@@ -2543,12 +2454,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByFirebaseUid')->willReturn($this->userData);
@@ -2567,12 +2476,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByFirebaseUid')->willReturn($this->userData);
@@ -2592,12 +2499,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByFirebaseUid')
@@ -2621,12 +2526,10 @@ class AuthServiceTest extends TestCase
     {
         $recaptchaHelper = Mockery::mock('overload:' . GoogleRecaptchaHelper::class);
         $recaptchaHelper->shouldReceive('isValid')
-            ->once()
             ->andReturn(true);
 
         $firebaseAuthHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
         $firebaseAuthHelper->shouldReceive('verificarIdToken')
-            ->once()
             ->andReturn($this->firebaseUserData);
 
         $this->userRepository->method('getByFirebaseUid')

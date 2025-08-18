@@ -2,12 +2,15 @@
 
 namespace Tests\Services;
 
+use App\Helpers\Valid;
 use App\Repositories\UserRepository;
 use App\Services\UserService;
 use Mockery;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\UserFixture;
 
+#[RunTestsInSeparateProcesses] //aplicando para rodar cada teste em um processo separado, necessário para o Mockery overload funcionar corretamente
 class UserServiceTest extends TestCase
 {
     use UserFixture;
@@ -30,5 +33,70 @@ class UserServiceTest extends TestCase
         parent::tearDown();
         $this->userData['is_active'] = 1;
         Mockery::close();
+    }
+
+
+    //get()
+    public function testGetSucesso(): void
+    {
+        $this->userRepository->expects($this->once())
+            ->method('getByUserId')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn($this->userData);
+
+        $result = $this->userService->get(
+            $this->userData['id']
+        );
+
+        // Assert básico: retornou array
+        $this->assertIsArray($result);
+
+        $this->assertArrayHasKey('nome', $result);
+        $this->assertArrayHasKey('sobrenome', $result);
+        $this->assertArrayHasKey('email', $result);
+        $this->assertArrayHasKey('photoBlob', $result);
+        $this->assertArrayHasKey('ultimoAcesso', $result);
+        $this->assertArrayHasKey('criadoEm', $result);
+        $this->assertArrayHasKey('alteradoEm', $result);
+        $this->assertArrayHasKey('isContaGoogle', $result);
+
+        $this->assertNotEmpty($result['nome']);
+        $this->assertNotEmpty($result['sobrenome']);
+        $this->assertNotEmpty($result['email']);
+        $this->assertNotEmpty($result['criadoEm']);
+        $this->assertNotEmpty($result['isContaGoogle']);
+
+        $this->assertIsString($result['nome']);
+        $this->assertIsString($result['sobrenome']);
+        $this->assertIsString($result['email']);
+        if (!empty($result['photoBlob'])) {
+            $this->assertIsString($result['photoBlob']);
+        }
+
+        if (!empty($result['ultimoAcesso'])) {
+            $this->assertIsString($result['ultimoAcesso']);
+            $this->assertTrue(Valid::isValidDateTime($result['ultimoAcesso']));
+            $this->assertInstanceOf(\DateTime::class, new \DateTime($result['ultimoAcesso']));
+        } else {
+            $this->assertNull($result['ultimoAcesso']);
+        }
+
+        if (!empty($result['criadoEm'])) {
+            $this->assertIsString($result['criadoEm']);
+            $this->assertTrue(Valid::isValidDateTime($result['criadoEm']));
+            $this->assertInstanceOf(\DateTime::class, new \DateTime($result['criadoEm']));
+        } else {
+            $this->assertNull($result['criadoEm']);
+        }
+
+        if (!empty($result['alteradoEm'])) {
+            $this->assertIsString($result['alteradoEm']);
+            $this->assertTrue(Valid::isValidDateTime($result['alteradoEm']));
+            $this->assertInstanceOf(\DateTime::class, new \DateTime($result['alteradoEm']));
+        } else {
+            $this->assertNull($result['alteradoEm']);
+        }
+
+        $this->assertIsBool($result['isContaGoogle']);
     }
 }

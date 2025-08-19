@@ -99,4 +99,17 @@ class UserServiceTest extends TestCase
 
         $this->assertIsBool($result['isContaGoogle']);
     }
+
+    public function testGetFalhaUsuarioNaoEncontrado(): void
+    {
+        $this->userRepository
+            ->method('getByUserId')
+            ->willReturn(null);
+
+        $this->expectExceptionMessage("Sem conteúdo.");
+
+        $this->userService->get(
+            $this->userData['id']
+        );
+    }
 }

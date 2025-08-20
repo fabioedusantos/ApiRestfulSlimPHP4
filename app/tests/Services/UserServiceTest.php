@@ -112,4 +112,42 @@ class UserServiceTest extends TestCase
             $this->userData['id']
         );
     }
+
+
+    //set()
+    public function testSetSucessoFirebase(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $senha = (string)null;
+        $photoBase64 = (string)null;
+        $isRemovePhoto = false;
+
+        $this->userRepository->expects($this->once())
+            ->method('getByUserId')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateProfile')
+            ->with(
+                $this->equalTo($userId),
+                $this->equalTo($nome),
+                $this->equalTo($sobrenome),
+                $this->equalTo(null),
+                $this->equalTo(null),
+                $this->equalTo($isRemovePhoto)
+            )
+            ->willReturn(true);
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

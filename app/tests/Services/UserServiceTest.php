@@ -187,4 +187,43 @@ class UserServiceTest extends TestCase
             $isRemovePhoto
         );
     }
+
+    public function testSetSucessoContaNormalComNomeSobrenomeSenha(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $senha = "Senha@123!";
+        $photoBase64 = (string)null;
+        $isRemovePhoto = false;
+
+        $this->userData['firebase_uid'] = null; //setamos para desativar o teste de conta firebase
+        $this->userRepository->expects($this->once())
+            ->method('getByUserId')
+            ->with($this->equalTo($this->userData['id']))
+            ->willReturn($this->userData);
+
+        $this->userRepository->expects($this->once())
+            ->method('updateProfile')
+            ->with(
+                $this->equalTo($userId),
+                $this->equalTo($nome),
+                $this->equalTo($sobrenome),
+                $this->callback(function ($senhaHash) use ($senha) {
+                    return password_verify($senha, $senhaHash);
+                }),
+                $this->equalTo(null),
+                $this->equalTo($isRemovePhoto)
+            )
+            ->willReturn(true);
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

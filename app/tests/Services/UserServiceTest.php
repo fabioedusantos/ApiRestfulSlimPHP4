@@ -530,4 +530,33 @@ class UserServiceTest extends TestCase
             $isRemovePhoto
         );
     }
+
+    public function testSetFalhaUsuarioNaoExiste(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $senha = "Senha@123!";
+        $photoBase64 = base64_encode($this->userData['photo_blob']);
+        $isRemovePhoto = false;
+
+        $this->userRepository
+            ->method('getByUserId')
+            ->willReturn(null);
+
+        $this->userRepository
+            ->method('updateProfile')
+            ->willReturn(true);
+
+        $this->expectExceptionMessage("Usuário não existe.");
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

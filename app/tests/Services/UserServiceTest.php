@@ -588,4 +588,33 @@ class UserServiceTest extends TestCase
             $isRemovePhoto
         );
     }
+
+    public function testSetFalhaSobrenomeMuitoCurto(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = "S";
+        $senha = "Senha@123!";
+        $photoBase64 = base64_encode($this->userData['photo_blob']);
+        $isRemovePhoto = false;
+
+        $this->userRepository
+            ->method('getByUserId')
+            ->willReturn($this->userData);
+
+        $this->userRepository
+            ->method('updateProfile')
+            ->willReturn(true);
+
+        $this->expectExceptionMessage("Sobrenome muito curto.");
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

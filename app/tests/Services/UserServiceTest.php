@@ -649,4 +649,34 @@ class UserServiceTest extends TestCase
             $isRemovePhoto
         );
     }
+
+    public function testSetFalhaImagemFormatoInvalido(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $senha = "Senha@123!";
+        $photoBase64 = "base64-cagado";
+        $isRemovePhoto = false;
+
+        $this->userData['firebase_uid'] = null; //setamos para desativar o teste de conta firebase
+        $this->userRepository
+            ->method('getByUserId')
+            ->willReturn($this->userData);
+
+        $this->userRepository
+            ->method('updateProfile')
+            ->willReturn(true);
+
+        $this->expectExceptionMessage("Imagem no formato inválido.");
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

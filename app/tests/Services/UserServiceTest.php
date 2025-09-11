@@ -679,4 +679,34 @@ class UserServiceTest extends TestCase
             $isRemovePhoto
         );
     }
+
+    public function testSetFalhaAtualizarPerfil(): void
+    {
+        $userId = $this->userData['id'];
+        $nome = $this->userData['nome'];
+        $sobrenome = $this->userData['sobrenome'];
+        $senha = "Senha@123!";
+        $photoBase64 = base64_encode($this->userData['photo_blob']);
+        $isRemovePhoto = false;
+
+        $this->userData['firebase_uid'] = null; //setamos para desativar o teste de conta firebase
+        $this->userRepository
+            ->method('getByUserId')
+            ->willReturn($this->userData);
+
+        $this->userRepository
+            ->method('updateProfile')
+            ->willReturn(false);
+
+        $this->expectExceptionMessage("Não foi possível atualizar perfil. Tente novamente.");
+
+        $this->userService->set(
+            $userId,
+            $nome,
+            $sobrenome,
+            $senha,
+            $photoBase64,
+            $isRemovePhoto
+        );
+    }
 }

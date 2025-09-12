@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\BadRequestException;
 use App\Exceptions\InternalServerErrorException;
 use App\Helpers\EnvHelper;
+use App\Helpers\PhotoHelper;
 use App\Repositories\UserRepository;
 
 class UserService
@@ -79,10 +80,11 @@ class UserService
 
         $photoBlob = null;
         if (!$isGoogleAccount && !$isRemovePhoto && !empty($photoBase64)) {
-            if (!base64_decode($photoBase64, true)) {
-                throw new BadRequestException("Imagem no formato inválido.");
+            try {
+                $photoBlob = PhotoHelper::photoBase64ToBlob($photoBase64);
+            } catch (\Exception $e) {
+                throw new BadRequestException("Não foi possível processar a imagem: " . $e->getMessage(), 0, $e);
             }
-            $photoBlob = EnvHelper::photoBase64ToBlob($photoBase64);
         }
 
         if (!empty($nome) || !empty($sobrenome) || !empty($senha) || !empty($photoBase64) || $isRemovePhoto) {

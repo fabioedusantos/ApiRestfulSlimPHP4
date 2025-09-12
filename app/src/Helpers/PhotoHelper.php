@@ -69,7 +69,7 @@ class PhotoHelper
         // Decodifica
         $binaryData = base64_decode($photoBlob, true);
         if ($binaryData === false) {
-            throw new \Exception("Base64 inválido.");
+            throw new \Exception("O arquivo de imagem não é válido ou está corrompido.");
         }
 
         // Verifica se é uma imagem válida
@@ -78,7 +78,7 @@ class PhotoHelper
         finfo_close($finfo);
 
         if (!in_array($mimeType, ['image/jpeg', 'image/png', 'image/gif'])) {
-            throw new \Exception("Conteúdo não é uma imagem válida.");
+            throw new \Exception("Conteúdo não é uma imagem válida (os tipos aceitos são: .jpeg, .png e ,.gif).");
         }
 
         return $binaryData;

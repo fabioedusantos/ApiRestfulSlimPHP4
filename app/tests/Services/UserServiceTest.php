@@ -668,7 +668,9 @@ class UserServiceTest extends TestCase
             ->method('updateProfile')
             ->willReturn(true);
 
-        $this->expectExceptionMessage("Não foi possível processar a imagem: O arquivo de imagem não é válido ou está corrompido.");
+        $this->expectExceptionMessage(
+            "Não foi possível processar a imagem: O arquivo de imagem não é válido ou está corrompido."
+        );
 
         $this->userService->set(
             $userId,
@@ -699,7 +701,9 @@ class UserServiceTest extends TestCase
             ->method('updateProfile')
             ->willReturn(true);
 
-        $this->expectExceptionMessage("Não foi possível processar a imagem: Conteúdo não é uma imagem válida (os tipos aceitos são: .jpeg, .png e ,.gif).");
+        $this->expectExceptionMessage(
+            "Não foi possível processar a imagem: Conteúdo não é uma imagem válida (os tipos aceitos são: .jpeg, .png e ,.gif)."
+        );
 
         $this->userService->set(
             $userId,

@@ -142,4 +142,51 @@ class EmailServiceTest extends TestCase
             $tempoDuracao
         );
     }
+
+
+    //sendAccountConfirmationEmail()
+    public function testEnviarConfirmacaoDeResetDeSenhaSucesso(): void
+    {
+        $email = $this->userData['email'];
+        $nome = $this->userData['nome'];
+        $codigo = "123456";
+        $tempoDuracao = "2 horas";
+
+        $this->phpMailer->expects($this->once())
+            ->method('addAddress')
+            ->with(
+                $this->equalTo($email),
+                $this->equalTo($nome)
+            );
+
+        $this->twig->expects($this->once())
+            ->method('render')
+            ->with(
+                $this->equalTo("PasswordResetEmail.twig"),
+                $this->equalTo([
+                    "titulo" => "Código de Redefinição de Senha para Sua Conta BUSINESS LOGO",
+                    "nome" => $nome,
+                    "codigo" => $codigo,
+                    "tempoDuracao" => $tempoDuracao
+                ])
+            )
+            ->willReturn("<Corpo HTML da Mensagem Supimpa>");
+
+        $this->phpMailer->expects($this->once())
+            ->method('addEmbeddedImage')
+            ->with(
+                $this->isString(),
+                $this->equalTo("logo")
+            );
+
+        $this->phpMailer->expects($this->once())
+            ->method('send');
+
+        $this->emailService->sendPasswordReset(
+            $email,
+            $nome,
+            $codigo,
+            $tempoDuracao
+        );
+    }
 }

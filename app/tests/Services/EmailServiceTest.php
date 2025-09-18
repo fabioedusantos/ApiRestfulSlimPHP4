@@ -189,4 +189,31 @@ class EmailServiceTest extends TestCase
             $tempoDuracao
         );
     }
+
+    public function testEnviarConfirmacaoDeResetDeSenhaFalha(): void
+    {
+        $email = $this->userData['email'];
+        $nome = $this->userData['nome'];
+        $codigo = "123456";
+        $tempoDuracao = "2 horas";
+
+        $this->phpMailer->method('addAddress');
+
+        $this->twig->method('render')
+            ->willReturn("<Corpo HTML da Mensagem Supimpa>");
+
+        $this->phpMailer->method('addEmbeddedImage');
+
+        $this->phpMailer->method('send')
+            ->willThrowException(new \Exception("Super erro da alegria dos desenvolvedores."));
+
+        $this->expectExceptionMessage("Erro ao enviar email.\n");
+
+        $this->emailService->sendPasswordReset(
+            $email,
+            $nome,
+            $codigo,
+            $tempoDuracao
+        );
+    }
 }

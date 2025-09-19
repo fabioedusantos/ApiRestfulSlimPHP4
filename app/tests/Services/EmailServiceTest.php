@@ -5,12 +5,10 @@ namespace Tests\Services;
 use App\Services\EmailService;
 use Mockery;
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\UserFixture;
 use Twig\Environment;
 
-#[RunTestsInSeparateProcesses] //aplicando para rodar cada teste em um processo separado, necessário para o Mockery overload funcionar corretamente
 class EmailServiceTest extends TestCase
 {
     use UserFixture;

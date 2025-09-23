@@ -75,4 +75,21 @@ class NotificationServiceTest extends TestCase
         $this->assertNotEmpty($response['name']);
         $this->assertIsString($response['name']);
     }
+
+    public function testSendToAllFalhaChannelIdNaoPermitido(): void
+    {
+        $channelId = "batatinha";
+        $title = "Teste de envio de email";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $this->expectExceptionMessage("ChannelId não permitido.");
+
+        $this->notificationService->sendToAll(
+            $channelId,
+            $title,
+            $body,
+            $link
+        );
+    }
 }

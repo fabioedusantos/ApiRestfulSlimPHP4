@@ -92,4 +92,21 @@ class NotificationServiceTest extends TestCase
             $link
         );
     }
+
+    public function testSendToAllFalhaTitleMuitoCurto(): void
+    {
+        $channelId = "gerais";
+        $title = "T";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $this->expectExceptionMessage("Title muito curto.");
+
+        $this->notificationService->sendToAll(
+            $channelId,
+            $title,
+            $body,
+            $link
+        );
+    }
 }

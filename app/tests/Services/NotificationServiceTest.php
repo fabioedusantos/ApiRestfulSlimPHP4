@@ -109,4 +109,21 @@ class NotificationServiceTest extends TestCase
             $link
         );
     }
+
+    public function testSendToAllFalhaBodyMuitoCurto(): void
+    {
+        $channelId = "gerais";
+        $title = "Teste de envio de email";
+        $body = "T";
+        $link = "link/qualquer";
+
+        $this->expectExceptionMessage("Body muito curto.");
+
+        $this->notificationService->sendToAll(
+            $channelId,
+            $title,
+            $body,
+            $link
+        );
+    }
 }

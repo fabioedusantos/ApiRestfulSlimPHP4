@@ -126,4 +126,34 @@ class NotificationServiceTest extends TestCase
             $link
         );
     }
+
+    public function testSendToAllFalhaDesconhecida(): void
+    {
+        $channelId = "gerais";
+        $title = "Teste de envio de email";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $firebaseMessagingHelper = Mockery::mock('overload:' . FirebaseMessagingHelper::class);
+
+        $firebaseMessagingHelper->shouldReceive('sendNotificationToAll')
+            ->once()
+            ->with(
+                $this->equalTo($channelId),
+                $this->equalTo($title),
+                $this->equalTo($body),
+                $this->equalTo($link)
+            )
+            ->andThrow(new \Exception("Erro do Firebase Bonitão."));
+
+
+        $this->expectExceptionMessage("Houve um erro desconhecido.");
+
+        $this->notificationService->sendToAll(
+            $channelId,
+            $title,
+            $body,
+            $link
+        );
+    }
 }

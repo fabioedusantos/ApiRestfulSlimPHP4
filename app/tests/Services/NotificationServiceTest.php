@@ -217,4 +217,30 @@ class NotificationServiceTest extends TestCase
             $link
         );
     }
+
+    public function testSendNotificationToDeviceFalhaDeviceTokenInvalido(): void
+    {
+        $channelId = "gerais";
+        //tem que ter no minimo 152 caracteres
+        $deviceToken = "batatinha";
+        $title = "Teste de envio de email";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $this->expectExceptionMessage("DeviceToken inválido.");
+
+        $responseJson = $this->notificationService->sendNotificationToDevice(
+            $channelId,
+            $deviceToken,
+            $title,
+            $body,
+            $link
+        );
+
+        $this->assertIsArray($responseJson);
+
+        $this->assertArrayHasKey('name', $responseJson);
+        $this->assertNotEmpty($responseJson['name']);
+        $this->assertIsString($responseJson['name']);
+    }
 }

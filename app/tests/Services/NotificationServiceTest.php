@@ -243,4 +243,31 @@ class NotificationServiceTest extends TestCase
         $this->assertNotEmpty($responseJson['name']);
         $this->assertIsString($responseJson['name']);
     }
+
+    public function testSendNotificationToDeviceFalhaTitleMuitoCurto(): void
+    {
+        $channelId = "gerais";
+        //tem que ter no minimo 152 caracteres
+        $deviceToken = "u9xG7qzTf5lJ0hX2UqK4vZcA1Y8bRd3pL6mVnWsQbI7kCz9H2dO3aXc0vNwF1jLt5pU7YzqMw6d3pL"
+            . "6mVnWsQbIdO3aX7kCz9H2dO3aXc0vNwF1jLt5pU7YzqMw6oJbTgZK0V9sLkWf8EuCn3Rz2jPv4";
+        $title = "T";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $this->expectExceptionMessage("Title muito curto.");
+
+        $responseJson = $this->notificationService->sendNotificationToDevice(
+            $channelId,
+            $deviceToken,
+            $title,
+            $body,
+            $link
+        );
+
+        $this->assertIsArray($responseJson);
+
+        $this->assertArrayHasKey('name', $responseJson);
+        $this->assertNotEmpty($responseJson['name']);
+        $this->assertIsString($responseJson['name']);
+    }
 }

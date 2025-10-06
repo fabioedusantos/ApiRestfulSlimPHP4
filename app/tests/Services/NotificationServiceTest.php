@@ -297,4 +297,38 @@ class NotificationServiceTest extends TestCase
         $this->assertNotEmpty($responseJson['name']);
         $this->assertIsString($responseJson['name']);
     }
+
+    public function testSendNotificationToDeviceFalhaDesconhecida(): void
+    {
+        $channelId = "gerais";
+        //tem que ter no minimo 152 caracteres
+        $deviceToken = "u9xG7qzTf5lJ0hX2UqK4vZcA1Y8bRd3pL6mVnWsQbI7kCz9H2dO3aXc0vNwF1jLt5pU7YzqMw6d3pL"
+            . "6mVnWsQbIdO3aX7kCz9H2dO3aXc0vNwF1jLt5pU7YzqMw6oJbTgZK0V9sLkWf8EuCn3Rz2jPv4";
+        $title = "Teste de envio de email";
+        $body = "Teste de corpo de email";
+        $link = "link/qualquer";
+
+        $firebaseMessagingHelper = Mockery::mock('overload:' . FirebaseMessagingHelper::class);
+
+        $firebaseMessagingHelper->shouldReceive('sendNotificationToDevice')
+            ->once()
+            ->with(
+                $this->equalTo($channelId),
+                $this->equalTo($deviceToken),
+                $this->equalTo($title),
+                $this->equalTo($body),
+                $this->equalTo($link)
+            )
+            ->andThrow(new \Exception("Erro do Firebase Bonitão."));
+
+        $this->expectExceptionMessage("Houve um erro desconhecido.");
+
+        $this->notificationService->sendNotificationToDevice(
+            $channelId,
+            $deviceToken,
+            $title,
+            $body,
+            $link
+        );
+    }
 }

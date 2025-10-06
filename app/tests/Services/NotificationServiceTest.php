@@ -6,9 +6,11 @@ namespace Tests\Services;
 use App\Helpers\FirebaseMessagingHelper;
 use App\Services\NotificationService;
 use Mockery;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Tests\Fixtures\UserFixture;
 
+#[RunTestsInSeparateProcesses] //aplicando para rodar cada teste em um processo separado, necessário para o Mockery overload funcionar corretamente
 class NotificationServiceTest extends TestCase
 {
     use UserFixture;
@@ -135,7 +137,6 @@ class NotificationServiceTest extends TestCase
         $link = "link/qualquer";
 
         $firebaseMessagingHelper = Mockery::mock('overload:' . FirebaseMessagingHelper::class);
-
         $firebaseMessagingHelper->shouldReceive('sendNotificationToAll')
             ->once()
             ->with(
@@ -309,7 +310,6 @@ class NotificationServiceTest extends TestCase
         $link = "link/qualquer";
 
         $firebaseMessagingHelper = Mockery::mock('overload:' . FirebaseMessagingHelper::class);
-
         $firebaseMessagingHelper->shouldReceive('sendNotificationToDevice')
             ->once()
             ->with(

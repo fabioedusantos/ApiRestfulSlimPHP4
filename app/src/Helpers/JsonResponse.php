@@ -36,7 +36,7 @@ class JsonResponse
         Response $response,
         int $code,
         string $status,
-        string $message = null,
+        ?string $message = null,
         ?array $data = null,
         array $extra = []
     ): Response {

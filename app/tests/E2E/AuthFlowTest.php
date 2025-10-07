@@ -1,0 +1,56 @@
+<?php
+
+namespace Tests\E2E;
+
+use Mockery;
+
+class AuthFlowTest extends BaseFlow
+{
+    private string $useNewSenha = "123@#!senhA";
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        Mockery::close();
+    }
+
+
+    public function testSignupSucesso(): string
+    {
+        $body = [
+            'name' => $this->userData['nome'],
+            'lastname' => $this->userData['sobrenome'],
+            'email' => $this->userData['email'],
+            'password' => $this->useSenha,
+            'isTerms' => true,
+            'isPolicy' => true,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/signup', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(201, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Se o e-mail informado estiver correto, você receberá em breve as instruções para confirmar sua conta.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayHasKey('expirationInHours', $responseBody['data']);
+        $this->assertEquals(2, $responseBody['data']['expirationInHours']);
+        $this->assertIsInt($responseBody['data']['expirationInHours']);
+
+        return $this->resetCode;
+    }
+}

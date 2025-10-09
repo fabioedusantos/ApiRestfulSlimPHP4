@@ -81,4 +81,22 @@ class AuthFlowTest extends BaseFlow
         $this->assertEquals(2, $responseBody['data']['expirationInHours']);
         $this->assertIsInt($responseBody['data']['expirationInHours']);
     }
+
+    public function testConfirmEmailSucesso(): void
+    {
+        $resetCode = $this->testSignupSucesso();
+        $body = [
+            'email' => $this->userData['email'],
+            'code' => $resetCode,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/confirm_email', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(204, $response->getStatusCode());
+    }
 }

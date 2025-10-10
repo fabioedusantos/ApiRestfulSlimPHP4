@@ -99,4 +99,45 @@ class AuthFlowTest extends BaseFlow
 
         $this->assertEquals(204, $response->getStatusCode());
     }
+
+    private function login(string $senha): array
+    {
+        $body = [
+            'email' => $this->userData['email'],
+            'password' => $senha,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/login', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Login realizado com sucesso.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayHasKey('token', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['token']);
+        $this->assertNotEmpty($responseBody['data']['token']);
+
+        $this->assertArrayHasKey('refreshToken', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['refreshToken']);
+
+        $this->assertNotEmpty($responseBody['data']['refreshToken']);
+
+        return $responseBody['data'];
+    }
+
+    public function testLoginSucesso(): array
+    {
+        $this->testConfirmEmailSucesso();
+        return $this->login($this->useSenha);
+    }
 }

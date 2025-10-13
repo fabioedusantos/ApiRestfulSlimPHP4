@@ -140,4 +140,32 @@ class AuthFlowTest extends BaseFlow
         $this->testConfirmEmailSucesso();
         return $this->login($this->useSenha);
     }
+
+    public function testForgotPasswordSucesso(): void
+    {
+        $this->testSignupSucesso();
+        $body = [
+            'email' => $this->userData['email'],
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/forgot_password', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Se o e-mail informado estiver correto, você receberá em breve as instruções para redefinir sua senha.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayHasKey('expirationInHours', $responseBody['data']);
+        $this->assertEquals(2, $responseBody['data']['expirationInHours']);
+        $this->assertIsInt($responseBody['data']['expirationInHours']);
+    }
 }

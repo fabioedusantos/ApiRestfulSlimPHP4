@@ -168,4 +168,26 @@ class AuthFlowTest extends BaseFlow
         $this->assertEquals(2, $responseBody['data']['expirationInHours']);
         $this->assertIsInt($responseBody['data']['expirationInHours']);
     }
+
+    public function testResetPasswordSucesso(): void
+    {
+        $this->testForgotPasswordSucesso();
+        $body = [
+            'email' => $this->userData['email'],
+            'code' => $this->resetCode,
+            'password' => $this->useNewSenha,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/reset_password', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(204, $response->getStatusCode());
+
+        //testamos com a nova senha
+        $this->login($this->useNewSenha);
+    }
 }

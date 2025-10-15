@@ -190,4 +190,28 @@ class AuthFlowTest extends BaseFlow
         //testamos com a nova senha
         $this->login($this->useNewSenha);
     }
+
+    private function testCheckResetCodeAtivo(): void
+    {
+        $body = [
+            'email' => $this->userData['email'],
+            'code' => $this->resetCode,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+
+        $request = $this->createRequest('POST', '/auth/check_reset_code', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Código ativo.',
+            $responseBody['message']
+        );
+    }
 }

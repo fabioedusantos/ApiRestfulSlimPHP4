@@ -214,4 +214,10 @@ class AuthFlowTest extends BaseFlow
             $responseBody['message']
         );
     }
+
+    public function testCheckResetCodeDeCriacaoDeContaEstaAtivoSucesso(): void
+    {
+        $this->testSignupSucesso();
+        $this->testCheckResetCodeAtivo();
+    }
 }

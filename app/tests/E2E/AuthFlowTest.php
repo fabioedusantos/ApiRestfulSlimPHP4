@@ -220,4 +220,10 @@ class AuthFlowTest extends BaseFlow
         $this->testSignupSucesso();
         $this->testCheckResetCodeAtivo();
     }
+
+    public function testCheckResetCodeDeRedefinicaoDeSenhaEstaAtivoSucesso(): void
+    {
+        $this->testForgotPasswordSucesso();
+        $this->testCheckResetCodeAtivo();
+    }
 }

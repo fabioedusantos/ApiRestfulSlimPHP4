@@ -226,4 +226,26 @@ class AuthFlowTest extends BaseFlow
         $this->testForgotPasswordSucesso();
         $this->testCheckResetCodeAtivo();
     }
+
+    private function isLoggedIn(array $token): void
+    {
+        $request = $this->createRequest(
+            'GET',
+            '/auth/is_logged_in',
+            headers: [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer ' . $token['token']
+            ]
+        );
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(204, $response->getStatusCode());
+    }
+
+    public function testIsLoggedInByLoginSucesso(): void
+    {
+        $token = $this->testLoginSucesso();
+        $this->isLoggedIn($token);
+    }
 }

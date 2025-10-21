@@ -248,4 +248,42 @@ class AuthFlowTest extends BaseFlow
         $token = $this->testLoginSucesso();
         $this->isLoggedIn($token);
     }
+    private function refreshToken(array $token): array
+    {
+        $body = [
+            'refreshToken' => $token['refreshToken']
+        ];
+
+        $request = $this->createRequest(
+            'POST',
+            '/auth/refresh_token',
+            body: $body
+        );
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Token atualizado realizado com sucesso.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayHasKey('token', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['token']);
+        $this->assertNotEmpty($responseBody['data']['token']);
+
+        $this->assertArrayHasKey('refreshToken', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['refreshToken']);
+        $this->assertNotEmpty($responseBody['data']['refreshToken']);
+
+        return $responseBody['data'];
+    }
+
+    public function testRefreshTokenLoginSucesso(): array
+    {
+        $token = $this->testLoginSucesso();
+        return $this->refreshToken($token);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\E2E;
 
+use App\Helpers\FirebaseAuthHelper;
 use Mockery;
 
 class AuthFlowTest extends BaseFlow
@@ -19,6 +20,17 @@ class AuthFlowTest extends BaseFlow
         Mockery::close();
     }
 
+    private function firebaseFake(
+        string $firebaseIdToken
+    ) {
+        $recaptchaHelper = Mockery::mock('overload:' . FirebaseAuthHelper::class);
+        $recaptchaHelper->shouldReceive('verificarIdToken')
+            ->once()
+            ->with(
+                $this->equalTo($firebaseIdToken)
+            )
+            ->andReturn($this->firebaseUserData);
+    }
 
     public function testSignupSucesso(): string
     {
@@ -291,5 +303,43 @@ class AuthFlowTest extends BaseFlow
     {
         $token = $this->testRefreshTokenLoginSucesso();
         $this->isLoggedIn($token);
+    }
+
+    public function testSignupGoogleSucesso(): array
+    {
+        $body = [
+            'idTokenFirebase' => $this->firebaseUserData->uid,
+            'name' => $this->userData['nome'],
+            'lastname' => $this->userData['sobrenome'],
+            'isTerms' => true,
+            'isPolicy' => true,
+            'recaptchaToken' => 'fake-token',
+            'recaptchaSiteKey' => 'fake-site-key'
+        ];
+
+        $this->recaptchaFake($body['recaptchaToken'], $body['recaptchaSiteKey']);
+        $this->firebaseFake($body['idTokenFirebase']);
+
+        $request = $this->createRequest('POST', '/auth/google/signup', body: $body);
+        $response = $this->app->handle($request);
+
+        $this->assertEquals(201, $response->getStatusCode());
+
+        $responseBody = $this->assertSuccess($response);
+
+        $this->assertEquals(
+            'Conta criada e logada com sucesso.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayHasKey('token', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['token']);
+        $this->assertNotEmpty($responseBody['data']['token']);
+
+        $this->assertArrayHasKey('refreshToken', $responseBody['data']);
+        $this->assertIsString($responseBody['data']['refreshToken']);
+        $this->assertNotEmpty($responseBody['data']['refreshToken']);
+
+        return $responseBody['data'];
     }
 }

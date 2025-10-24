@@ -255,11 +255,18 @@ class AuthFlowTest extends BaseFlow
         $this->assertEquals(204, $response->getStatusCode());
     }
 
+    public function testIsLoggedInBySignupSucesso(): void
+    {
+        $token = $this->testLoginSucesso();
+        $this->isLoggedIn($token);
+    }
+
     public function testIsLoggedInByLoginSucesso(): void
     {
         $token = $this->testLoginSucesso();
         $this->isLoggedIn($token);
     }
+
     private function refreshToken(array $token): array
     {
         $body = [
@@ -342,4 +349,5 @@ class AuthFlowTest extends BaseFlow
 
         return $responseBody['data'];
     }
+
 }

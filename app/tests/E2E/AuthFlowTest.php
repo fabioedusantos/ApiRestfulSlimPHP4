@@ -392,4 +392,10 @@ class AuthFlowTest extends BaseFlow
         return $responseBody['data'];
     }
 
+    public function testIsLoggedInByLoginGoogleSucesso(): void
+    {
+        $token = $this->testLoginGoogleSucesso();
+        $this->isLoggedIn($token);
+    }
+
 }

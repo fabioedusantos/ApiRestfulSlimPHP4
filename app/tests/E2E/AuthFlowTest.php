@@ -404,4 +404,10 @@ class AuthFlowTest extends BaseFlow
         return $this->refreshToken($token);
     }
 
+    public function testIsLoggedInByRefreshTokenLoginGoogleSucesso(): void
+    {
+        $token = $this->testRefreshTokenLoginGoogleSucesso();
+        $this->isLoggedIn($token);
+    }
+
 }

@@ -410,4 +410,36 @@ class AuthFlowTest extends BaseFlow
         $this->isLoggedIn($token);
     }
 
+    public function testRefreshTokenFalhaAutenticacaoUsuarioInexistente(): void
+    {
+        $refreshToken = $this->generateInvalidRefreshToken();
+        $body = [
+            'refreshToken' => $refreshToken
+        ];
+
+        $request = $this->createRequest(
+            'POST',
+            '/auth/refresh_token',
+            body: $body
+        );
+        $response = $this->app->handle($request);
+        $responseBody = json_decode((string)$response->getBody(), true);
+
+        $this->assertEquals(401, $response->getStatusCode());
+
+        $this->assertIsArray($responseBody);
+        $this->assertNotEmpty($responseBody);
+
+        $this->assertArrayHasKey('status', $responseBody);
+        $this->assertEquals('error', $responseBody['status']);
+
+        $this->assertArrayHasKey('message', $responseBody);
+        $this->assertEquals(
+            'Usuário não autorizado.',
+            $responseBody['message']
+        );
+
+        $this->assertArrayNotHasKey('data', $responseBody);
+    }
+
 }

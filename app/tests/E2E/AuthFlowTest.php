@@ -442,4 +442,19 @@ class AuthFlowTest extends BaseFlow
         $this->assertArrayNotHasKey('data', $responseBody);
     }
 
+    public function testIsLoggedInFalhaAutenticacao(): void
+    {
+        $request = $this->createRequest(
+            'GET',
+            '/auth/is_logged_in',
+            headers: [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                'Authorization' => 'Bearer token-falso-aqui'
+            ]
+        );
+        $response = $this->app->handle($request);
+        $this->assertJwtNaoAutorizado($response);
+    }
+
 }

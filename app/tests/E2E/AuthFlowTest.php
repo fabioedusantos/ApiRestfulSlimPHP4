@@ -457,4 +457,21 @@ class AuthFlowTest extends BaseFlow
         $this->assertJwtNaoAutorizado($response);
     }
 
+    public function testIsLoggedInFalhaAutenticacaoUsuarioInexistente(): void
+    {
+        $fakeToken = $this->generateInvalidToken();
+        $request = $this->createRequest(
+            'GET',
+            '/auth/is_logged_in',
+            headers: [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+                //token valido mas com usuário inválido
+                'Authorization' => 'Bearer ' . $fakeToken
+            ]
+        );
+        $response = $this->app->handle($request);
+        $this->assertNaoAutorizadoUsuarioInativoOuInexistente($response);
+    }
+
 }

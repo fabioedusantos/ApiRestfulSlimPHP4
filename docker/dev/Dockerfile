@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.4.14-apache
 
 # Cria a pasta public dentro de /var/www/html
 RUN mkdir -p /var/www/html/public

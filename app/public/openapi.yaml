@@ -1,0 +1,431 @@
+openapi: 3.0.0
+info:
+  title: 'API Default'
+  description: "Documentação da API Default.\r\n<br><br>\r\n**NOTA ESSENCIAL (Modo DEV):** A funcionalidade de **bypass** do **Google reCAPTCHA** presente neste projeto, só será \r\nativada se a variável de ambiente no arquivo `store/.env` estiver configurada como `APP_ENV=\\\"DEV\\\"`. Se essa \r\nespecificação não for atendida, todos os *endpoints* protegidos (que esperam recaptchaToken e recaptchaSiteKey no body) \r\nrejeitarão as requisições sem um **token** Google reCAPTCHA válido.\r\n<br><br>\r\n**REQUISITO TÉCNICO (Firebase):** As rotas de `/google` deste projeto exigem um **`idTokenFirebase`** (JWT) válido, que \r\nsó pode ser obtido através da autenticação bem-sucedida do usuário no **front-end** via SDK do Google Firebase.\r\n<br><br><br>\r\n**Sobre o Desenvolvedor:**\r\n<br>\r\n* **Email:** fabioedusantos@gmail.com\r\n<br>\r\n* **Website:** [fbsantos.com.br](https://fbsantos.com.br)\r\n<br>\r\n* **LinkedIn:** [fabioedusantos](https://www.linkedin.com/in/fabioedusantos/)"
+  version: 1.0.0
+servers:
+  -
+    url: 'https://localhost'
+    description: 'Servidor local'
+paths:
+  /auth/signup:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a criação de conta de usuário com conta padrão (email e senha)'
+      description: 'Endpoint responsável por realizar a criação de conta de usuário e enviar um e-mail com o código de confirmação para autorizar a conta'
+      operationId: 32341302ad2b488cb017664b2eb59659
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - lastname
+                - email
+                - password
+                - isTerms
+                - isPolicy
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                name:
+                  description: 'Nome do usuário'
+                  type: string
+                lastname:
+                  description: 'Sobrenome do usuário'
+                  type: string
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                password:
+                  description: 'Senha do usuário'
+                  type: string
+                isTerms:
+                  description: 'Aceito os termos da aplicação'
+                  type: boolean
+                isPolicy:
+                  description: 'Aceito a política de privacidade da aplicação'
+                  type: boolean
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 'Criação bem sucedida'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Se o e-mail informado estiver correto, você receberá em breve as instruções para confirmar sua conta.\",\r\n                        \"data\": {\r\n                            \"expirationInHours\": 2\r\n                        }\r\n                    }"
+  /auth/resend_confirm_email:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza o reenvio do código de confirmação de conta padrão (email e senha) por e-mail'
+      description: 'Endpoint responsável por realizar o envio do novo código de confirmação de conta padrão por e-mail.'
+      operationId: 17ee5da29c7f815c6c2e4032ad5271a9
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Código de confirmação enviado com sucesso'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Se o e-mail informado estiver correto, você receberá em breve as instruções para redefinir sua senha.\",\r\n                        \"data\": {\r\n                            \"expirationInHours\": 2\r\n                        }\r\n                    }"
+  /auth/check_reset_code:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a checagem se o código de redefinição de senha ou ativação de conta padrão (email e senha) está ativo'
+      description: 'Realiza a checagem se o código de redefinição de senha ou ativação de conta padrão (email e senha) está ativo. Este endpoint faz parte do ciclo de redefinição de senha a ação iniciada por /auth/forgot_password.'
+      operationId: 930bb9e0c1bd40191dd6bc5ef4c72dbf
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - code
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                code:
+                  description: 'Código de redefinição de senha enviado no e-mail do usuário'
+                  type: string
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Código ativo'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Código ativo.\"\r\n                    }"
+  /auth/confirm_email:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a ativação de conta padrão (email e senha)'
+      description: 'Endpoint responsável por realizar a ativação de conta padrão através do código enviado por e-mail. Este endpoint conclui a ação iniciada por /auth/signup.'
+      operationId: d38314d4d7aed47d9c90c162c951945c
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - code
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                code:
+                  description: 'Código de ativação de conta enviado no e-mail do usuário'
+                  type: string
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '204':
+          description: 'Conta ativada com sucesso'
+  /auth/forgot_password:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza o envio do código de redefinição de senha de conta padrão (email e senha) por e-mail'
+      description: 'Endpoint responsável por realizar o envio código de redefinição de senha de conta padrão por e-mail'
+      operationId: cda235a8950fe1198e8ffda4fb8dae0f
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Código de confirmação enviado com sucesso'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Se o e-mail informado estiver correto, você receberá em breve as instruções para redefinir sua senha.\",\r\n                        \"data\": {\r\n                            \"expirationInHours\": 2\r\n                        }\r\n                    }"
+  /auth/reset_password:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a alteração de senha de conta padrão (email e senha)'
+      description: 'Endpoint responsável por realizar a alteração de senha de conta padrão. Este endpoint conclui a ação iniciada por /auth/forgot_password.'
+      operationId: 4ac1499a22a6cfb321c14fc6632191e5
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - code
+                - password
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                code:
+                  description: 'Código de redefinição de senha enviado no e-mail do usuário'
+                  type: string
+                password:
+                  description: 'Nova senha do usuário'
+                  type: string
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '204':
+          description: 'Senha redefinida com sucesso'
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza o login do usuário com conta padrão (email e senha)'
+      description: 'Endpoint responsável por realizar o login e retornar um token de autenticação'
+      operationId: 363e422b5a8c763fa1ea6fd03a77481d
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - email
+                - password
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                email:
+                  description: 'Email do usuário'
+                  type: string
+                  format: email
+                password:
+                  description: 'Senha do usuário'
+                  type: string
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Login bem sucedido'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Login realizado com sucesso.\",\r\n                        \"data\": {\r\n                            \"token\": \"string-com-token-de-autenticacao\",\r\n                            \"refreshToken\": \"string-com-token-de-atualizacao\"\r\n                        }\r\n                    }"
+  /auth/refresh_token:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a atualização do token do usuário utilizando o refreshToken'
+      description: 'Endpoint responsável por realizar a atualização do token do usuário e retornar um novo token de autenticação'
+      operationId: 70992819d51c02efa6834af81d7d91e0
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  description: 'RefreshToken do usuário'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Atualização do token bem sucedida'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Token atualizado realizado com sucesso.\",\r\n                        \"data\": {\r\n                            \"token\": \"string-com-token-de-autenticacao\",\r\n                            \"refreshToken\": \"string-com-token-de-atualizacao\"\r\n                        }\r\n                    }"
+  /auth/is_logged_in:
+    get:
+      tags:
+        - Auth
+      summary: 'Realiza a checagem se o usuário está autenticado e seu token é válido'
+      description: 'Realiza a checagem se o usuário está autenticado e seu token é válido, se tudo correr bem atualiza o seu último acesso.'
+      operationId: 3ccfdc3d154f064815eb9060051e7480
+      responses:
+        '204':
+          description: 'Conta autenticada e token ativo'
+      security:
+        -
+          BearerAuth: []
+  /auth/google/signup:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza a criação de conta de usuário com conta Google/Firebase'
+      description: 'Endpoint responsável por realizar a criação de conta de usuário Google/Firebase já ativada e autenticada (token de login)'
+      operationId: eaf730920be864093a8d7178c436234a
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - idTokenFirebase
+                - name
+                - lastname
+                - isTerms
+                - isPolicy
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                idTokenFirebase:
+                  description: 'Token Firebase do usuário'
+                  type: string
+                name:
+                  description: 'Nome do usuário'
+                  type: string
+                lastname:
+                  description: 'Sobrenome do usuário'
+                  type: string
+                isTerms:
+                  description: 'Aceito os termos da aplicação'
+                  type: boolean
+                isPolicy:
+                  description: 'Aceito a política de privacidade da aplicação'
+                  type: boolean
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 'Criação bem sucedida'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Conta criada e logada com sucesso.\",\r\n                        \"data\": {\r\n                            \"token\": \"string-com-token-de-autenticacao\",\r\n                            \"refreshToken\": \"string-com-token-de-atualizacao\"\r\n                        }\r\n                    }"
+  /auth/google/login:
+    post:
+      tags:
+        - Auth
+      summary: 'Realiza o login do usuário com conta Google/Firebase'
+      description: 'Endpoint responsável por realizar o login e retornar um token de autenticação'
+      operationId: da1306281926d9b568b5c43a5c50fe64
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - idTokenFirebase
+                - recaptchaToken
+                - recaptchaSiteKey
+              properties:
+                idTokenFirebase:
+                  description: 'Token Firebase do usuário'
+                  type: string
+                recaptchaToken:
+                  description: 'Token do Google reCAPTCHA'
+                  type: string
+                recaptchaSiteKey:
+                  description: 'Site key do Google reCAPTCHA'
+                  type: string
+              type: object
+      responses:
+        '200':
+          description: 'Login bem sucedido'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Login realizado com sucesso.\",\r\n                        \"data\": {\r\n                            \"token\": \"string-com-token-de-autenticacao\",\r\n                            \"refreshToken\": \"string-com-token-de-atualizacao\"\r\n                        }\r\n                    }"
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      description: 'Bearer JWT Token para autenticação'
+      bearerFormat: JWT
+      scheme: bearer
+tags:
+  -
+    name: Auth
+    description: 'Endpoints de autenticação'

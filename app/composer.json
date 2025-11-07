@@ -11,10 +11,11 @@
     "google/cloud-recaptcha-enterprise": "^2.2",
     "predis/predis": "^3.2",
     "phpmailer/phpmailer": "^6.12",
-    "twig/twig": "^3.21",
+    "twig/twig": "^3.22",
     "kreait/firebase-php": "^7.23",
     "ext-fileinfo": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "zircote/swagger-php": "^5.5"
   },
   "autoload": {
     "psr-4": {

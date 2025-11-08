@@ -418,6 +418,183 @@ paths:
             application/json:
               schema: {  }
               example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Login realizado com sucesso.\",\r\n                        \"data\": {\r\n                            \"token\": \"string-com-token-de-autenticacao\",\r\n                            \"refreshToken\": \"string-com-token-de-atualizacao\"\r\n                        }\r\n                    }"
+  /:
+    get:
+      tags:
+        - Status
+      summary: 'Verifica o status da API'
+      description: 'Endpoint usado para checar se a API está em funcionamento'
+      operationId: b398e747a4fa88288e2bd24ada43f386
+      responses:
+        '200':
+          description: 'API operacional'
+          content:
+            application/json:
+              schema: {  }
+              example: '{"status":"success","message":"API on!"}'
+  /notifications/push_channels:
+    get:
+      tags:
+        - Notifications
+      summary: 'Retorna os canais permitidos para enviar notificações push'
+      description: 'Retorna os canais permitidos para enviar notificações push'
+      operationId: 791ed7415ef365502f98ef598a889345
+      responses:
+        '200':
+          description: 'Canais permitidos.'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Push Channels.\",\r\n                        \"data\": [\r\n                            \"channelID1\",\r\n                            \"channelID2\",\r\n                            \"channelIDN\"\r\n                        ]\r\n                    }"
+      security:
+        -
+          BearerAuth: []
+  /notifications/send_push_to_device:
+    post:
+      tags:
+        - Notifications
+      summary: 'Realiza o envio de notificações push para um dispositivo/usuário'
+      description: 'Realiza o envio de notificações push para um dispositivo/usuário'
+      operationId: 6793b42da9b55169ce711ed557e856b3
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - channelId
+                - deviceToken
+                - title
+                - body
+                - link
+              properties:
+                channelId:
+                  description: 'Canal da notificação push (/notifications/push_channels retorna os permitidos)'
+                  type: string
+                deviceToken:
+                  description: 'Id firebase do device/usuário que receberá a notificação push.'
+                  type: string
+                title:
+                  description: 'Titulo da notificação push'
+                  type: string
+                body:
+                  description: 'Corpo da notificação push (se omitida, será o mesmo que o titulo)'
+                  type: string
+                link:
+                  description: 'Url ou link que aplicação abrirá ao tocar (ação) na notificação push. Pode ser omitido.'
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 'Notificação Push enviada'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Notificação push enviada com sucesso para DEVICETOKENAQUI.\",\r\n                        \"data\": {\r\n                            \"name\": \"projects/projectname-3as234/messages/6587734535230942853\"\r\n                        }\r\n                    }"
+      security:
+        -
+          BearerAuth: []
+  /notifications/send_push_to_all:
+    post:
+      tags:
+        - Notifications
+      summary: 'Realiza o envio de notificações push para todos os dispositivos/usuários'
+      description: 'Realiza o envio de notificações push para todos os dispositivos/usuários'
+      operationId: eb8f9c8c8fcf3bd428c433145e1d6630
+      requestBody:
+        description: 'Corpo da requisição'
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - channelId
+                - title
+                - body
+                - link
+              properties:
+                channelId:
+                  description: 'Canal da notificação push (/notifications/push_channels retorna os permitidos)'
+                  type: string
+                title:
+                  description: 'Titulo da notificação push'
+                  type: string
+                body:
+                  description: 'Corpo da notificação push (se omitida, será o mesmo que o titulo)'
+                  type: string
+                link:
+                  description: 'Url ou link que aplicação abrirá ao tocar (ação) na notificação push. Pode ser omitido.'
+                  type: string
+              type: object
+      responses:
+        '201':
+          description: 'Notificação Push enviada'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Notificação push enviada com sucesso para CHANNELIDAQUI.\",\r\n                        \"data\": {\r\n                            \"name\": \"projects/projectname-3as234/messages/6587734535230942853\"\r\n                        }\r\n                    }"
+      security:
+        -
+          BearerAuth: []
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: 'Retorna os dados do usuário logado'
+      description: 'Retorna os dados do usuário logado'
+      operationId: 3a7ca55a76dc121f4fcc6f9dd659add1
+      responses:
+        '200':
+          description: 'Dados do usuário'
+          content:
+            application/json:
+              schema: {  }
+              example: "{\r\n                        \"status\": \"success\",\r\n                        \"message\": \"Sucesso.\",\r\n                        \"data\": {\r\n                            \"nome\": \"José\",\r\n                            \"sobrenome\": \"Silva\",\r\n                            \"email\": \"jSilva@gmail.com\",\r\n                            \"photoBlob\": null,\r\n                            \"ultimoAcesso\": \"2025-10-09 18:03:23\",\r\n                            \"criadoEm\": \"2025-10-09 14:32:15\",\r\n                            \"alteradoEm\": \"2025-10-09 14:32:15\",\r\n                            \"isContaGoogle\": false\r\n                        }\r\n                    }"
+      security:
+        -
+          BearerAuth: []
+    patch:
+      tags:
+        - Users
+      summary: 'Atualiza os dados do usuário logado'
+      description: 'Atualiza as informações do usuário autenticado. Nenhum campo do corpo da requisição é obrigatório; é possível atualizar apenas alguns dados, como o nome, sobrenome ou senha, conforme necessário. Você pode alterar um ou mais campos sem a necessidade de atualizar todos.'
+      operationId: cfbd9e6cafd4189c5406cc6530afff2c
+      requestBody:
+        description: 'Corpo da requisição'
+        required: false
+        content:
+          application/json:
+            schema:
+              required:
+                - name
+                - lastname
+                - password
+                - photoBlob
+                - isRemovePhoto
+              properties:
+                name:
+                  description: 'Nome do usuário'
+                  type: string
+                lastname:
+                  description: 'Sobrenome do usuário'
+                  type: string
+                password:
+                  description: 'Senha do usuário'
+                  type: string
+                photoBlob:
+                  description: 'Foto do usuário blob em base64'
+                  type: string
+                isRemovePhoto:
+                  description: 'Se true remove a foto do usuário'
+                  type: boolean
+              type: object
+      responses:
+        '204':
+          description: 'Dados do usuário atualizados com sucesso'
+      security:
+        -
+          BearerAuth: []
 components:
   securitySchemes:
     BearerAuth:
@@ -427,5 +604,14 @@ components:
       scheme: bearer
 tags:
   -
+    name: Status
+    description: 'Endpoints de status'
+  -
     name: Auth
     description: 'Endpoints de autenticação'
+  -
+    name: Users
+    description: 'Endpoints de usuário'
+  -
+    name: Notifications
+    description: 'Endpoints de notificações'

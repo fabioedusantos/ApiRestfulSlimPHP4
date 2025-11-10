@@ -29,7 +29,7 @@ class FirebaseCredentialsHelper
     public static function get(): array
     {
         try {
-            $firebaseKeyPath = __DIR__ . '/../../' . $_ENV['FIREBASE_KEY_PATH'];
+            $firebaseKeyPath = __DIR__ . '/../../../' . $_ENV['FIREBASE_KEY_PATH'];
 
             if (empty($_ENV['FIREBASE_KEY_PATH']) || !file_exists($firebaseKeyPath)) {
                 throw new InternalServerErrorException('[Firebase] Chave de conta de serviço não definida.');

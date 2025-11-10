@@ -32,7 +32,7 @@ class GoogleRecaptchaHelper
      */
     private static function getCredentialPath(): string
     {
-        $recaptchaKeyPath = __DIR__ . '/../../' . $_ENV['RECAPTCHA_GOOGLE_KEY_PATH'];
+        $recaptchaKeyPath = __DIR__ . '/../../../' . $_ENV['RECAPTCHA_GOOGLE_KEY_PATH'];
 
         if (empty($_ENV['RECAPTCHA_GOOGLE_KEY_PATH']) || !file_exists($recaptchaKeyPath)) {
             throw new InternalServerErrorException('[Recaptcha] Chave de conta de serviço não definida.');
